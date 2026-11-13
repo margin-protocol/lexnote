@@ -10,7 +10,7 @@
 :root{
   --bg:#F5F0E6; --paper:#FCFAF5; --paper2:#F0E9DC; --ink:#2A2520; --ink2:#6E6458; --ink3:#9C9284;
   --line:#E2D8C7; --accent:#8A3A2C; --accent-soft:#F3E3D9; --gold:#A8843A;
-  --amber:#FBF0D3; --amber-b:#D9B65C; --blue:#E3ECF3; --blue-b:#7C9DB8; --red:#F7E1DE; --red-b:#C47A6E; --green:#E3EFE2; --green-b:#7FA67A;
+  --amber:#FBF0D3; --amber-b:#D9B65C; --blue:#E3ECF3; --blue-b:#7C9DB8; --red:#F7E1DE; --red-b:#C47A6E; --green:#E3EFE2; --green-b:#7FA67A; --brown:#EFE4DA; --brown-b:#9A7458;
   --mark:#F8E59B; --shadow:0 1px 2px rgba(60,40,20,.05),0 4px 16px rgba(60,40,20,.05);
   --mk-a:rgba(248,214,110,.6); --mk-pink:rgba(232,170,160,.34); --mk-blue:rgba(140,170,200,.3); --mk-ul:rgba(160,70,55,.75);
   --serif:'Noto Serif TC',serif; --sans:'Noto Sans TC',system-ui,sans-serif; --latin:'Cormorant Garamond',serif;
@@ -18,7 +18,7 @@
 [data-theme=dark]{
   --bg:#171614; --paper:#201E1B; --paper2:#2A2723; --ink:#ECE5D8; --ink2:#AFA597; --ink3:#7E7569;
   --line:#37322C; --accent:#D99478; --accent-soft:#3A2A23; --gold:#CBA75E;
-  --amber:#3A3220; --amber-b:#9C8240; --blue:#1F2B35; --blue-b:#5D7F9B; --red:#3A2421; --red-b:#A0625A; --green:#22301F; --green-b:#5F8A5A;
+  --amber:#3A3220; --amber-b:#9C8240; --blue:#1F2B35; --blue-b:#5D7F9B; --red:#3A2421; --red-b:#A0625A; --green:#22301F; --green-b:#5F8A5A; --brown:#33281F; --brown-b:#8A6A50;
   --mark:#6B5A1E; --shadow:0 1px 2px rgba(0,0,0,.3),0 4px 16px rgba(0,0,0,.25);
   --mk-a:rgba(200,160,60,.45); --mk-pink:rgba(200,120,110,.32); --mk-blue:rgba(110,150,190,.32); --mk-ul:rgba(230,140,120,.85);
 }
@@ -167,6 +167,7 @@ h1,h2,h3,h4{font-family:var(--serif);line-height:1.4;margin:0}
 .doc .callout.blue{background:var(--blue);border-color:var(--blue-b)}
 .doc .callout.red{background:var(--red);border-color:var(--red-b)}
 .doc .callout.green{background:var(--green);border-color:var(--green-b)}
+.doc .callout.brown{background:var(--brown);border-color:var(--brown-b)}
 .doc .c-red{color:#B4483A}
 [data-theme=dark] .doc .c-red{color:#E58C7E}
 .doc a.plink{background:var(--accent-soft);text-decoration:none;padding:0 6px;border-radius:5px;font-size:.92em}
@@ -580,7 +581,7 @@ function sanitize(html){
       const keep={A:['href'],IMG:['data-img'],TD:['colspan','rowspan'],TH:['colspan','rowspan']}[c.tagName]||[];
       const cls=c.getAttribute('class')||'';
       for(const a of [...c.attributes]) if(!keep.includes(a.name)) c.removeAttribute(a.name);
-      if(/callout|c-red|plink|hl-pink|hl-blue|ul-red/.test(cls)) c.setAttribute('class',cls.split(/\s+/).filter(x=>/^(callout|amber|blue|red|green|c-red|plink|hl-pink|hl-blue|ul-red)$/.test(x)).join(' '));
+      if(/callout|c-red|plink|hl-pink|hl-blue|ul-red/.test(cls)) c.setAttribute('class',cls.split(/\s+/).filter(x=>/^(callout|amber|blue|red|green|brown|c-red|plink|hl-pink|hl-blue|ul-red)$/.test(x)).join(' '));
       if(c.tagName==='A'){ const h=c.getAttribute('href')||''; if(/^javascript:/i.test(h)) c.removeAttribute('href'); else if(!h.startsWith('#')){ c.setAttribute('target','_blank'); c.setAttribute('rel','noopener'); } }
       if(c.tagName==='IMG' && !c.getAttribute('data-img')) c.remove();
       if(c.tagName==='SPAN' && !c.getAttribute('class')) c.replaceWith(...c.childNodes);
@@ -590,10 +591,11 @@ function sanitize(html){
 }
 function serialize(area){ const c=area.cloneNode(true); $$('img[data-img]',c).forEach(i=>i.removeAttribute('src')); return sanitize(c.innerHTML); }
 
+let flushEditor=null;
 function makeEditor(html,onChange,ph,onDone){
   const w=document.createElement('div'); w.className='ed';
   const B=(a,l,t)=>`<button type="button" data-ed="${a}" title="${t||''}">${l}</button>`;
-  w.innerHTML=`<div class="ed-bar"><button type="button" data-ed="done" class="done">✓ 完成</button>${B('h2','<b>大標</b>')}${B('h3','<b>小標</b>')}${B('p','內文')}<span class="sep"></span>${B('bold','<b>B</b>','粗體')}${B('italic','<i>I</i>','斜體')}${B('underline','<u>U</u>','底線')}${B('hlmenu','<span style="background:linear-gradient(transparent 55%,var(--mk-a) 55%);padding:0 2px">畫重點</span> ▾','選一種畫重點的樣式')}${B('red','<span style="color:#B4483A">紅字</span>')}<span class="sep"></span>${B('ul','• 清單')}${B('ol','1. 編號')}<span class="sep"></span>${B('c-amber','🟨 重點')}${B('c-blue','🟦 提醒')}${B('c-red','🟥 易混淆')}${B('c-green','🟩 實務')}<span class="sep"></span>${B('table','表格')}${B('img','圖片')}${B('link','連結')}${B('plink','連條文')}${B('hr','分隔線')}${B('clear','清除格式')}${B('delblock','🗑 刪除方塊','刪除游標所在的提示框、表格或點選的圖片')}</div>
+  w.innerHTML=`<div class="ed-bar"><button type="button" data-ed="done" class="done">✓ 完成</button>${B('h2','<b>大標</b>')}${B('h3','<b>小標</b>')}${B('p','內文')}<span class="sep"></span>${B('bold','<b>B</b>','粗體')}${B('italic','<i>I</i>','斜體')}${B('underline','<u>U</u>','底線')}${B('hlmenu','<span style="background:linear-gradient(transparent 55%,var(--mk-a) 55%);padding:0 2px">畫重點</span> ▾','選一種畫重點的樣式')}${B('red','<span style="color:#B4483A">紅字</span>')}<span class="sep"></span>${B('ul','• 清單')}${B('ol','1. 編號')}<span class="sep"></span>${B('c-amber','🟨 重點')}${B('c-blue','🟦 提醒')}${B('c-red','🟥 易混淆')}${B('c-green','🟩 實務')}${B('c-brown','🟫 學說')}<span class="sep"></span>${B('table','表格')}${B('img','圖片')}${B('link','連結')}${B('plink','連條文')}${B('hr','分隔線')}${B('clear','清除格式')}${B('delblock','🗑 刪除方塊','刪除游標所在的提示框、表格或點選的圖片')}</div>
   <div class="ed-area doc" contenteditable="true" data-ph="${esc(ph)}"></div><input type="file" accept="image/*" hidden>`;
   const area=$('.ed-area',w), file=$('input[type=file]',w), bar=$('.ed-bar',w); const mainBar=bar.innerHTML;
   const hlBar=`<button type="button" data-ed="hl-back">‹ 返回</button>${B('mark','<span style="background:linear-gradient(transparent 55%,var(--mk-a) 55%);padding:0 2px">螢光</span>','半截螢光')}${B('hl-pink','<span style="background:var(--mk-pink);border-radius:3px;padding:0 4px">粉底</span>','粉色底')}${B('hl-blue','<span style="background:var(--mk-blue);border-radius:3px;padding:0 4px">藍底</span>','藍色底')}${B('ul-red','<span style="text-decoration:underline;text-decoration-color:var(--mk-ul);text-decoration-thickness:2px;text-underline-offset:4px">底線</span>','紅色底線')}${B('hl-none','取消標記','把選取文字的標記拿掉')}`;
@@ -607,7 +609,7 @@ function makeEditor(html,onChange,ph,onDone){
     root.querySelectorAll&&root.querySelectorAll('mark,span.hl-pink,span.hl-blue,span.ul-red').forEach(x=>{ if(r.intersectsNode(x)) hits.add(x); });
     hits.forEach(x=>x.replaceWith(...x.childNodes)); area.normalize(); };
   area.innerHTML=html; resolveImgs(area);
-  let t=null; const changed=()=>{ clearTimeout(t); t=setTimeout(()=>onChange(serialize(area)),400); setSave('編輯中…'); };
+  let t=null; const changed=()=>{ clearTimeout(t); t=setTimeout(()=>{ t=null; onChange(serialize(area)); },400); setSave('編輯中…'); }; flushEditor=()=>{ if(t){ clearTimeout(t); t=null; onChange(serialize(area)); } };
   area.addEventListener('input',changed);
   area.addEventListener('paste',e=>{
     const items=[...(e.clipboardData?.items||[])]; const im=items.find(i=>i.type.startsWith('image/'));
@@ -643,7 +645,7 @@ function makeEditor(html,onChange,ph,onDone){
   $('.ed-bar',w).addEventListener('pointerdown',e=>{ if(e.target.closest('button') && e.pointerType==='mouse') e.preventDefault(); });
   $('.ed-bar',w).addEventListener('click',e=>{
     const b=e.target.closest('[data-ed]'); if(!b) return; const a=b.dataset.ed;
-    if(a==='done'){ if(onDone) onDone(); return; }
+    if(a==='done'){ flushEditor&&flushEditor(); if(onDone) onDone(); return; }
     if(a==='hlmenu'){ bar.innerHTML=hlBar; bar.scrollLeft=0; return; }
     if(a==='hl-back'){ bar.innerHTML=mainBar; return; }
     if(['mark','hl-pink','hl-blue','ul-red','hl-none'].includes(a)){ restore();
@@ -659,7 +661,7 @@ function makeEditor(html,onChange,ph,onDone){
     else if(['hl-pink','hl-blue','ul-red'].includes(a)){ const s=getSelection().toString(); if(s) ex('insertHTML',`<span class="${a}">${esc(s)}</span>`); else toast('先選取要標記的文字'); }
     else if(a==='red'){ const s=getSelection().toString(); if(s) ex('insertHTML',`<span class="c-red">${esc(s)}</span>`); }
     else if(a==='ul') ex('insertUnorderedList'); else if(a==='ol') ex('insertOrderedList');
-    else if(a.startsWith('c-')){ const col=a.slice(2); const title={amber:'重點',blue:'考試提醒',red:'易混淆',green:'實務見解'}[col]; const s=getSelection().toString();
+    else if(a.startsWith('c-')){ const col=a.slice(2); const title={amber:'重點',blue:'考試提醒',red:'易混淆',green:'實務見解',brown:'學說'}[col]; const s=getSelection().toString();
       if(s) ex('delete');
       const nc=insertBlock(`<div class="callout ${col}"><b>${title}</b><br>${s?esc(s):'在這裡輸入內容'}</div><p><br></p>`);
       const t=nc.lastChild; const r=document.createRange(); if(t&&t.nodeType===3&&!s){ r.selectNodeContents(t); } else { r.selectNodeContents(nc); r.collapse(false); } const sl=getSelection(); sl.removeAllRanges(); sl.addRange(r); saved=r.cloneRange(); }
@@ -763,7 +765,7 @@ const A={
     openForm('條文資訊',[{k:'ref',l:'條號',v:p.ref,ph:'輸入數字就好',prefix:'§'},{k:'title',l:'條文名稱（選填）',v:p.title,ph:'可以空白'},{k:'ch',l:'所屬章節',type:'select',opts,v:db.chapters.findIndex(c=>c.id===p.chapterId)},{k:'tags',l:'標籤',type:'tags',v:p.tags||[]}],v=>{ p.title=v.title; p.ref=v.ref; p.tags=v.tags; p.chapterId=db.chapters[v.ch]?.id||p.chapterId; touch(p); }); },
   delPoint(el){ const p=byId(el.dataset.id); askConfirm(`刪除條文「${pName(p)}」？`,()=>{ db.points=db.points.filter(x=>x!==p); persist(); go('c-'+p.chapterId); }); },
   star(el){ const p=byId(el.dataset.id); p.star=!p.star; touch(p); },
-  toggleEdit(el){ const k=el.dataset.id+':'+el.dataset.field; editing = editing===k?null:k; if(!editing){ setSave(saveState==='編輯中…'?'儲存中…':saveState); } render(); },
+  toggleEdit(el){ flushEditor&&flushEditor(); const k=el.dataset.id+':'+el.dataset.field; editing = editing===k?null:k; if(!editing){ setSave(saveState==='編輯中…'?'儲存中…':saveState); } render(); },
   addDiagram(el){ const c=byId(el.dataset.id); const f=document.createElement('input'); f.type='file'; f.accept='image/*'; f.multiple=true;
     f.onchange=async()=>{ for(const file of f.files){ try{ setSave('上傳圖片…'); const d=await fileToCompressed(file); const id=await Store.putImg(d); (c.diagrams=c.diagrams||[]).push({img:id,cap:file.name.replace(/\.[^.]+$/,'')}); }catch(e){ toast('有圖片上傳失敗'); } } touch(c); }; f.click(); },
   capDiagram(el){ const c=byId(el.dataset.id), d=c.diagrams[+el.dataset.i]; openForm('圖片名稱',[{k:'cap',l:'名稱',v:d.cap}],v=>{ d.cap=v.cap; touch(c); }); },
