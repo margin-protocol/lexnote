@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LEXNOTE. 我的法律書房</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@500;700;900&family=Cormorant+Garamond:wght@600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F5F0E6; --paper:#FCFAF5; --paper2:#F0E9DC; --ink:#2A2520; --ink2:#6E6458; --ink3:#9C9284;
+  --line:#E2D8C7; --accent:#8A3A2C; --accent-soft:#F3E3D9; --gold:#A8843A;
+  --amber:#FBF0D3; --amber-b:#D9B65C; --blue:#E3ECF3; --blue-b:#7C9DB8; --red:#F7E1DE; --red-b:#C47A6E; --green:#E3EFE2; --green-b:#7FA67A;
+  --mark:#F8E59B; --shadow:0 1px 2px rgba(60,40,20,.05),0 4px 16px rgba(60,40,20,.05);
+  --serif:'Noto Serif TC',serif; --sans:'Noto Sans TC',system-ui,sans-serif; --latin:'Cormorant Garamond',serif;
+}
+[data-theme=dark]{
+  --bg:#171614; --paper:#201E1B; --paper2:#2A2723; --ink:#ECE5D8; --ink2:#AFA597; --ink3:#7E7569;
+  --line:#37322C; --accent:#D99478; --accent-soft:#3A2A23; --gold:#CBA75E;
+  --amber:#3A3220; --amber-b:#9C8240; --blue:#1F2B35; --blue-b:#5D7F9B; --red:#3A2421; --red-b:#A0625A; --green:#22301F; --green-b:#5F8A5A;
+  --mark:#6B5A1E; --shadow:0 1px 2px rgba(0,0,0,.3),0 4px 16px rgba(0,0,0,.25);
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.75;-webkit-font-smoothing:antialiased}
+a{color:var(--accent)}
+button{font-family:inherit;font-size:inherit;color:inherit}
+input,textarea,select{font-family:inherit;font-size:16px;color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:9px 12px;width:100%;outline:none}
+input:focus,textarea:focus,select:focus{border-color:var(--accent)}
+textarea{resize:vertical;min-height:90px;line-height:1.7}
+label{display:block;font-size:13px;color:var(--ink2);margin:14px 0 5px;font-weight:500}
+
+/* top bar */
+.top{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.top-in{max-width:1080px;margin:0 auto;padding:10px 20px;display:flex;align-items:center;gap:18px}
+.logo{font-family:var(--latin);font-weight:700;font-size:25px;letter-spacing:.06em;cursor:pointer;user-select:none;color:var(--ink);text-decoration:none}
+.logo span{color:var(--accent)}
+.nav{display:flex;gap:4px;flex:1}
+.nav a{padding:6px 12px;border-radius:999px;text-decoration:none;color:var(--ink2);font-size:14.5px}
+.nav a.on,.nav a:hover{background:var(--paper2);color:var(--ink)}
+.icon-btn{border:none;background:none;cursor:pointer;width:36px;height:36px;border-radius:50%;display:grid;place-items:center;color:var(--ink2)}
+.icon-btn:hover{background:var(--paper2);color:var(--ink)}
+.icon-btn svg{width:19px;height:19px}
+.save-state{font-size:12.5px;color:var(--ink3);min-width:52px;text-align:right}
+
+.wrap{max-width:1080px;margin:0 auto;padding:28px 20px 90px}
+.crumbs{font-size:13.5px;color:var(--ink3);margin-bottom:14px;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.crumbs a{color:var(--ink2);text-decoration:none}
+.crumbs a:hover{color:var(--accent)}
+.crumbs i{font-style:normal;opacity:.5}
+
+h1,h2,h3,h4{font-family:var(--serif);line-height:1.4;margin:0}
+.h1{font-size:34px;font-weight:900;letter-spacing:.02em}
+.sub{color:var(--ink2);margin-top:6px}
+.eyebrow{font-family:var(--latin);letter-spacing:.2em;font-size:13px;color:var(--gold);font-weight:700;text-transform:uppercase}
+
+.btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--paper);border-radius:999px;padding:7px 15px;font-size:14px;cursor:pointer;white-space:nowrap}
+.btn:hover{border-color:var(--ink3)}
+.btn.pri{background:var(--accent);border-color:var(--accent);color:#fff}
+[data-theme=dark] .btn.pri{color:#1a1310}
+.btn.pri:hover{filter:brightness(1.07)}
+.btn.ghost{border-color:transparent;background:none;color:var(--ink2)}
+.btn.ghost:hover{background:var(--paper2);color:var(--ink)}
+.btn.danger{color:#B4483A}
+.btn.sm{padding:4px 11px;font-size:13px}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.sp{flex:1}
+
+/* hero */
+.hero{padding:40px 0 30px;text-align:center}
+.hero .h1{font-size:40px;margin-top:6px}
+.searchbox{position:relative;max-width:620px;margin:26px auto 0}
+.searchbox input{padding:15px 20px 15px 50px;border-radius:999px;font-size:16.5px;background:var(--paper);box-shadow:var(--shadow)}
+.searchbox svg{position:absolute;left:18px;top:50%;transform:translateY(-50%);width:20px;color:var(--ink3)}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:16px}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:20px 22px;box-shadow:var(--shadow);cursor:pointer;transition:transform .15s,border-color .15s;position:relative}
+.card:hover{transform:translateY(-2px);border-color:var(--ink3)}
+.card h3{font-size:21px;font-weight:700}
+.card .meta{font-size:13px;color:var(--ink3);margin-top:10px}
+.card.add{border-style:dashed;box-shadow:none;background:transparent;display:grid;place-items:center;color:var(--ink3);min-height:118px}
+.card.add:hover{color:var(--accent);border-color:var(--accent)}
+.subj-mark{position:absolute;right:18px;top:16px;font-family:var(--serif);font-size:44px;line-height:1;color:var(--paper2);font-weight:900;pointer-events:none}
+
+.section{margin-top:44px}
+.sec-head{display:flex;align-items:baseline;gap:12px;margin-bottom:16px;border-bottom:1px solid var(--line);padding-bottom:10px}
+.sec-head h2{font-size:21px;font-weight:700}
+.sec-num{font-family:var(--latin);font-size:22px;color:var(--gold);font-weight:700;min-width:26px}
+.empty{color:var(--ink3);font-size:14.5px;padding:18px 0}
+
+.list{display:flex;flex-direction:column;gap:10px}
+.item{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:14px 18px;cursor:pointer;transition:border-color .15s}
+.item:hover{border-color:var(--ink3)}
+.item-t{font-family:var(--serif);font-weight:700;font-size:17px}
+.item-s{color:var(--ink2);font-size:14px;margin-top:3px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.ref{font-size:12.5px;color:var(--accent);background:var(--accent-soft);padding:1px 8px;border-radius:5px;margin-left:8px;font-family:var(--sans);font-weight:500;white-space:nowrap}
+
+.tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.tag{font-size:12px;padding:2px 10px;border-radius:999px;background:var(--paper2);color:var(--ink2);border:1px solid var(--line);cursor:pointer;white-space:nowrap}
+.tag.t-高頻考點{background:var(--red);border-color:var(--red-b)}
+.tag.t-易混淆{background:var(--amber);border-color:var(--amber-b)}
+.tag.t-待複習{background:var(--blue);border-color:var(--blue-b)}
+.tag.t-實務見解{background:var(--green);border-color:var(--green-b)}
+
+/* chapter layout */
+.ch-layout{display:grid;grid-template-columns:200px 1fr;gap:40px;margin-top:30px}
+.toc{position:sticky;top:80px;align-self:start;font-size:14.5px}
+.toc-t{font-size:12px;letter-spacing:.15em;color:var(--ink3);margin-bottom:10px}
+.toc a{display:flex;gap:10px;padding:6px 0;color:var(--ink2);text-decoration:none;border-left:2px solid var(--line);padding-left:12px}
+.toc a:hover{color:var(--accent);border-color:var(--accent)}
+.toc a b{font-family:var(--latin);color:var(--gold);font-weight:700}
+@media (max-width:800px){.ch-layout{grid-template-columns:1fr}.toc{display:none}.hero .h1{font-size:32px}.h1{font-size:28px}.nav a{padding:6px 8px}}
+@media (max-width:560px){.nav{display:none}.top-in{gap:8px}.mnav{display:flex!important}}
+.mnav{display:none;position:fixed;bottom:0;left:0;right:0;z-index:20;background:var(--paper);border-top:1px solid var(--line);justify-content:space-around;padding:6px 0 calc(6px + env(safe-area-inset-bottom))}
+.mnav a{text-decoration:none;color:var(--ink2);font-size:12px;display:flex;flex-direction:column;align-items:center;gap:1px;padding:4px 14px}
+.mnav a.on{color:var(--accent)}
+.mnav svg{width:21px;height:21px}
+
+.diagrams{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
+.dia{background:var(--paper);border:1px solid var(--line);border-radius:12px;overflow:hidden;position:relative;cursor:zoom-in}
+.dia img{width:100%;height:190px;object-fit:contain;display:block;background:#fff}
+.dia .cap{padding:8px 12px;font-size:13.5px;color:var(--ink2);display:flex;align-items:center;gap:6px}
+.dia .x{opacity:0;transition:opacity .15s}
+.dia:hover .x{opacity:1}
+@media (hover:none){.dia .x{opacity:1}}
+
+/* judgment & question cards */
+.jcard{background:var(--paper);border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:10px;padding:14px 18px}
+.jcard .jt{font-family:var(--serif);font-weight:700;font-size:16.5px}
+.jcard .jm{font-size:13px;color:var(--ink3);margin-top:2px}
+.jcard .ji{margin-top:8px;font-size:14.5px}
+.jcard .ji b{color:var(--accent);font-weight:500}
+.jcard .js{margin-top:6px;font-size:14.5px;color:var(--ink2);white-space:pre-wrap}
+.qcard{background:var(--paper);border:1px solid var(--line);border-left:3px solid var(--gold);border-radius:10px;padding:14px 18px}
+.qcard .qt{font-weight:700;font-family:var(--serif)}
+.qcard .qc{margin-top:8px;font-size:15px;white-space:pre-wrap}
+.qcard details{margin-top:10px;border-top:1px dashed var(--line);padding-top:8px}
+.qcard summary{cursor:pointer;font-size:14px;color:var(--accent)}
+.qcard .qa{white-space:pre-wrap;font-size:14.5px;margin-top:8px;color:var(--ink)}
+.status{display:inline-flex;border:1px solid var(--line);border-radius:999px;overflow:hidden;font-size:12.5px}
+.status button{border:none;background:none;padding:3px 10px;cursor:pointer;color:var(--ink3)}
+.status button.on.s0{background:var(--paper2);color:var(--ink)}
+.status button.on.s1{background:var(--amber);color:var(--ink)}
+.status button.on.s2{background:var(--green);color:var(--ink)}
+.linkchips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.linkchip{font-size:12.5px;color:var(--ink2);border:1px solid var(--line);border-radius:6px;padding:1px 8px;cursor:pointer;text-decoration:none;background:var(--bg)}
+.linkchip:hover{border-color:var(--accent);color:var(--accent)}
+
+/* doc / rich content */
+.doc{font-size:16.5px;line-height:1.95}
+.doc h2{font-size:22px;margin:1.3em 0 .5em}
+.doc h3{font-size:18.5px;margin:1.2em 0 .4em}
+.doc p{margin:.5em 0}
+.doc mark{background:var(--mark);color:inherit;padding:0 2px;border-radius:2px}
+.doc img{max-width:100%;border-radius:8px;border:1px solid var(--line);cursor:zoom-in;background:#fff}
+.doc table{border-collapse:collapse;width:100%;margin:12px 0;font-size:15px}
+.doc td,.doc th{border:1px solid var(--line);padding:7px 10px;vertical-align:top}
+.doc th{background:var(--paper2)}
+.doc blockquote{margin:12px 0;padding:4px 16px;border-left:3px solid var(--line);color:var(--ink2)}
+.doc hr{border:none;border-top:1px solid var(--line);margin:22px 0}
+.doc .callout{border-radius:10px;padding:12px 16px;margin:14px 0;border:1px solid}
+.doc .callout.amber{background:var(--amber);border-color:var(--amber-b)}
+.doc .callout.blue{background:var(--blue);border-color:var(--blue-b)}
+.doc .callout.red{background:var(--red);border-color:var(--red-b)}
+.doc .callout.green{background:var(--green);border-color:var(--green-b)}
+.doc .c-red{color:#B4483A}
+[data-theme=dark] .doc .c-red{color:#E58C7E}
+.doc a.plink{background:var(--accent-soft);text-decoration:none;padding:0 6px;border-radius:5px;font-size:.92em}
+
+.paper{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:26px 30px;box-shadow:var(--shadow)}
+@media (max-width:560px){.paper{padding:18px 16px}}
+
+/* editor */
+.ed{border:1px solid var(--line);border-radius:12px;background:var(--paper)}
+.ed-bar{display:flex;flex-wrap:wrap;gap:2px;padding:6px;border-bottom:1px solid var(--line);position:sticky;top:57px;background:var(--paper);z-index:5;border-radius:12px 12px 0 0}
+.ed-bar button{border:none;background:none;cursor:pointer;padding:5px 9px;border-radius:6px;font-size:13.5px;color:var(--ink2);min-width:32px}
+.ed-bar button:hover{background:var(--paper2);color:var(--ink)}
+.ed-bar .sep{width:1px;background:var(--line);margin:4px 3px}
+.ed-area{padding:18px 22px;min-height:260px;outline:none}
+.ed-area:empty:before{content:attr(data-ph);color:var(--ink3)}
+
+/* modal */
+.mask{position:fixed;inset:0;background:rgba(30,22,15,.4);z-index:50;display:flex;align-items:flex-start;justify-content:center;padding:6vh 14px;overflow:auto;animation:fade .15s}
+.modal{background:var(--paper);border-radius:16px;width:100%;max-width:620px;padding:24px 26px;box-shadow:0 20px 60px rgba(0,0,0,.25)}
+.modal h3{font-size:20px;margin-bottom:6px}
+.modal .acts{display:flex;justify-content:flex-end;gap:8px;margin-top:22px}
+@keyframes fade{from{opacity:0}}
+.picker{max-height:300px;overflow:auto;border:1px solid var(--line);border-radius:8px;padding:6px 10px;margin-top:6px}
+.picker .pg{font-size:12.5px;color:var(--ink3);margin:8px 0 2px}
+.picker label{display:flex;gap:8px;align-items:center;margin:2px 0;font-size:14.5px;color:var(--ink);font-weight:400;cursor:pointer}
+.picker label input{width:auto}
+.picker .pl{padding-left:18px}
+.chipsel{display:flex;flex-wrap:wrap;gap:6px}
+.chipsel .tag.on{outline:2px solid var(--accent);color:var(--ink)}
+
+.lightbox{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:60;display:grid;place-items:center;cursor:zoom-out;padding:20px}
+.lightbox img{max-width:100%;max-height:92vh;background:#fff;border-radius:6px}
+
+.banner{background:var(--red);border:1px solid var(--red-b);padding:10px 16px;border-radius:10px;margin-bottom:18px;font-size:14.5px}
+.hl{background:var(--mark);color:inherit;border-radius:2px}
+.stat{display:flex;gap:28px;justify-content:center;margin-top:22px;color:var(--ink3);font-size:13.5px}
+.stat b{display:block;font-family:var(--latin);font-size:28px;color:var(--ink);line-height:1.1}
+
+/* login */
+.login{min-height:100vh;display:grid;place-items:center;padding:20px}
+.login .box{width:100%;max-width:360px;text-align:center}
+.login .logo{font-size:42px}
+.err{color:#B4483A;font-size:14px;margin-top:10px;min-height:20px}
+.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:9px 18px;border-radius:999px;font-size:14px;z-index:70;animation:fade .2s}
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0}
+.filters select,.filters input{width:auto;padding:6px 12px;font-size:14px;border-radius:999px}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+'use strict';
+/* ============ utilities ============ */
+const $ = (s, r=document) => r.querySelector(s);
+const $$ = (s, r=document) => [...r.querySelectorAll(s)];
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2,7);
+const stripHtml = h => { const d=document.createElement('div'); d.innerHTML=h||''; d.querySelectorAll('img').forEach(i=>i.remove()); d.querySelectorAll('p,div,h2,h3,h4,li,br,td,th,tr').forEach(e=>e.after(' ')); return (d.textContent||'').replace(/\s+/g,' ').trim(); };
+const ls = { get(k,d){ try{ const v=localStorage.getItem(k); return v==null?d:JSON.parse(v);}catch(e){return d;} }, set(k,v){ try{localStorage.setItem(k,JSON.stringify(v));}catch(e){} } };
+const fmtDate = t => { if(!t) return ''; const d=new Date(t); return `${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()}`; };
+function toast(msg){ const t=document.createElement('div'); t.className='toast'; t.textContent=msg; document.body.appendChild(t); setTimeout(()=>t.remove(),2200); }
+
+const IC = {
+  search:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>',
+  moon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>',
+  sun:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>',
+  gear:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>',
+  book:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5z"/><path d="M4 19.5A2.5 2.5 0 0 0 6.5 22H20v-5"/></svg>',
+  gavel:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m14 13-7.5 7.5a2.1 2.1 0 0 1-3-3L11 10"/><path d="m16 16 6-6M8 8l6-6M9 7l8 8M21 11l-8-8"/></svg>',
+  pen:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>',
+  star:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"/></svg>',
+  starf:'<svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"/></svg>',
+};
+
+/* ============ storage ============ */
+const Store = {
+  mode:'local', ver:0,
+  async init(){
+    this.mode='local';
+    try{ if(navigator.storage&&navigator.storage.persist) navigator.storage.persist(); }catch(e){}
+    let d=null; try{ d=await idbGet('__db__'); }catch(e){}
+    if(!d) d=ls.get('lexnote-db', null);
+    return {db: d};
+  },
+  async save(db){
+    if(this.mode==='local'){ const ok=await idbPutWait('__db__', JSON.parse(JSON.stringify(db))); if(!ok){ try{ localStorage.setItem('lexnote-db',JSON.stringify(db)); }catch(e){ throw new Error('full'); } } return true; }
+    const r = await fetch('/api/db',{method:'PUT',credentials:'same-origin',headers:{'content-type':'application/json'},body:JSON.stringify({db,ver:this.ver})});
+    if(r.status===409){ throw new Error('conflict'); }
+    if(r.status===401){ throw new Error('auth'); }
+    if(!r.ok) throw new Error('fail');
+    const j=await r.json(); this.ver=j.ver; return true;
+  },
+  imgCache:{},
+  async putImg(dataURL){
+    const id='i'+uid();
+    if(this.mode==='api'){
+      const r = await fetch('/api/img',{method:'POST',credentials:'same-origin',headers:{'content-type':'application/json'},body:JSON.stringify({id,data:dataURL})});
+      if(!r.ok) throw new Error('img');
+      return id;
+    }
+    this.imgCache[id]=dataURL; idbPut(id,dataURL); return id;
+  },
+  async imgSrc(id){
+    if(this.mode==='api') return '/api/img/'+encodeURIComponent(id);
+    if(this.imgCache[id]) return this.imgCache[id];
+    const v = await idbGet(id); if(v) this.imgCache[id]=v; return v||'';
+  }
+};
+let _idb=null;
+function idb(){ if(_idb) return _idb; _idb=new Promise((res)=>{ try{ const q=indexedDB.open('lexnote',1); q.onupgradeneeded=()=>q.result.createObjectStore('img'); q.onsuccess=()=>res(q.result); q.onerror=()=>res(null);}catch(e){res(null);} }); return _idb; }
+async function idbPut(k,v){ const d=await idb(); if(!d) return; try{ d.transaction('img','readwrite').objectStore('img').put(v,k);}catch(e){} }
+async function idbPutWait(k,v){ const d=await idb(); if(!d) return false; return new Promise(res=>{ try{ const t=d.transaction('img','readwrite'); t.objectStore('img').put(v,k); t.oncomplete=()=>res(true); t.onerror=()=>res(false); t.onabort=()=>res(false);}catch(e){res(false);} }); }
+async function idbGet(k){ const d=await idb(); if(!d) return null; return new Promise(res=>{ try{ const q=d.transaction('img').objectStore('img').get(k); q.onsuccess=()=>res(q.result); q.onerror=()=>res(null);}catch(e){res(null);} }); }
+async function resolveImgs(root){ for(const im of $$('img[data-img]',root)){ const s=await Store.imgSrc(im.dataset.img); if(s) im.src=s; } }
+
+/* image compression: keeps diagrams readable, under ~1.4MB */
+function fileToCompressed(file){
+  return new Promise((res,rej)=>{
+    const fr=new FileReader();
+    fr.onload=()=>{ const img=new Image(); img.onload=()=>{
+      let max=2000, q=0.9, out='';
+      for(let i=0;i<6;i++){
+        const sc=Math.min(1,max/Math.max(img.width,img.height));
+        const c=document.createElement('canvas'); c.width=Math.round(img.width*sc); c.height=Math.round(img.height*sc);
+        const x=c.getContext('2d'); x.fillStyle='#fff'; x.fillRect(0,0,c.width,c.height); x.drawImage(img,0,0,c.width,c.height);
+        out=c.toDataURL('image/webp',q); if(!out.startsWith('data:image/webp')) out=c.toDataURL('image/jpeg',q);
+        if(out.length<1400000) break; max*=0.8; q-=0.08;
+      }
+      res(out);
+    }; img.onerror=rej; img.src=fr.result; };
+    fr.onerror=rej; fr.readAsDataURL(file);
+  });
+}
+
+/* ============ data ============ */
+let db=null;
+const PRESET_TAGS=['高頻考點','易混淆','待複習','實務見解','學說爭議'];
+const STATUS=['尚未練習','需要複習','已經掌握'];
+
+function seed(){
+  const S=(name,sub)=>({id:'s'+uid(),name,sub});
+  const xs=[S('刑法','總則・分則'),S('刑事訴訟法','程序・證據'),S('民法','總則・債・物權'),S('憲法','基本權・釋憲')];
+  const ch={id:'c'+uid(),subjectId:xs[0].id,name:'妨害性自主罪章',part:'分則',ref:'刑法第 221 條以下',tags:['高頻考點'],diagrams:[],supplement:'',updated:Date.now()};
+  const p1={id:'p'+uid(),chapterId:ch.id,title:'強制性交罪｜構成要件',ref:'§221',tags:['高頻考點'],star:true,updated:Date.now(),
+    html:`<div class="callout amber"><b>範例筆記</b>　這是示範用的筆記，可以直接修改或刪除。</div><h3>一、保護法益</h3><p>個人之<mark>性自主決定權</mark>。</p><h3>二、客觀構成要件</h3><p>1. 行為客體：男女（不限性別）。</p><p>2. 行為手段：強暴、脅迫、恐嚇、催眠術或<b>其他違反其意願之方法</b>。</p><p>3. 行為：性交（定義見刑法第 10 條第 5 項）。</p><div class="callout blue"><b>考試提醒</b><br>「其他違反其意願之方法」是否須達到與強暴、脅迫相當的程度，是常見爭點，作答時記得區分實務見解與學說。</div><h3>三、未遂</h3><p>第 2 項罰未遂犯。</p>`};
+  const p2={id:'p'+uid(),chapterId:ch.id,title:'乘機性交猥褻罪',ref:'§225',tags:['易混淆'],updated:Date.now(),
+    html:`<p>利用被害人精神、身體障礙、心智缺陷或其他相類之情形，致<mark>不能或不知抗拒</mark>而為性交或猥褻。</p><div class="callout red"><b>易混淆</b><br>與 §221 的差別：§225 是「利用」既存的不能或不知抗拒狀態；若狀態是行為人自己製造的，要回頭檢討 §221。</div>`};
+  const j1={id:'j'+uid(),court:'最高法院',no:'（示意資料｜字號待填）',date:'',url:'',issue:'如何認定「違反其意願」？',summary:'這是版型示意，不是真實判決。新增判決時填入裁判字號、日期與司法院法學資料檢索系統的連結即可。',links:[p1.id],tags:['實務見解'],updated:Date.now()};
+  const q1={id:'q'+uid(),exam:'（示意）律師一試',year:'',num:'',type:'申論題',content:'這是考題版型示意。請貼上題目內容。',answer:'擬答寫在這裡，平常會先收合起來，方便自我測驗。',links:[p1.id,p2.id],status:0,tags:[],updated:Date.now()};
+  return {v:1,subjects:xs,chapters:[ch],points:[p1,p2],judgments:[j1],questions:[q1]};
+}
+function normalize(d){ d=d||{}; for(const k of ['subjects','chapters','points','judgments','questions']) d[k]=d[k]||[]; return d; }
+const byId = id => db.subjects.find(x=>x.id===id)||db.chapters.find(x=>x.id===id)||db.points.find(x=>x.id===id)||db.judgments.find(x=>x.id===id)||db.questions.find(x=>x.id===id);
+const chOfPoint = p => db.chapters.find(c=>c.id===p.chapterId);
+const linkedTo = (arr,ids) => arr.filter(x=>(x.links||[]).some(l=>ids.includes(l)));
+
+/* saving */
+let saveT=null, saveState='', conflict=false;
+function setSave(s){ saveState=s; const el=$('#saveState'); if(el) el.textContent=s; }
+function persist(){ setSave('儲存中…'); clearTimeout(saveT); saveT=setTimeout(async()=>{
+  try{ await Store.save(db); setSave('已儲存'); }
+  catch(e){ if(e.message==='conflict'){ conflict=true; setSave('未儲存'); render(); } else if(e.message==='full'){ setSave('儲存失敗'); toast('裝置空間不足，請先匯出備份'); } else if(e.message==='auth'){ location.reload(); } else { setSave('儲存失敗'); toast('儲存失敗，請檢查網路'); } }
+},700); }
+window.addEventListener('beforeunload',e=>{ if(saveState==='儲存中…'){ e.preventDefault(); e.returnValue=''; } });
+
+/* recent (per device) */
+function pushRecent(id){ let r=ls.get('lexnote-recent',[]); r=[id,...r.filter(x=>x!==id)].slice(0,8); ls.set('lexnote-recent',r); }
+
+/* ============ theme ============ */
+function applyTheme(){ document.documentElement.dataset.theme = ls.get('lexnote-theme','light'); }
+applyTheme();
+
+/* ============ router ============ */
+let route={name:'home',id:null}; let searchQ='';
+function parseHash(){ const h=decodeURIComponent(location.hash.slice(1)); if(!h) return {name:'home'};
+  const m=h.match(/^(s|c|p)-(.+)$/); if(m) return {name:{s:'subject',c:'chapter',p:'point'}[m[1]],id:m[2]};
+  if(['judgments','questions','search'].includes(h)) return {name:h}; return {name:'home'}; }
+function go(h){ if(location.hash==='#'+h) render(); else location.hash=h; }
+window.addEventListener('hashchange',()=>{ route=parseHash(); render(); window.scrollTo(0,0); });
+
+/* ============ shell ============ */
+function shell(inner){
+  const n=route.name, dark=ls.get('lexnote-theme','light')==='dark';
+  const on=k=>(k==='home'?['home','subject','chapter','point'].includes(n):n===k)?'on':'';
+  return `<header class="top"><div class="top-in">
+    <a class="logo" href="#">LEXNOTE<span>.</span></a>
+    <nav class="nav"><a href="#" class="${on('home')}">書房</a><a href="#judgments" class="${on('judgments')}">判決庫</a><a href="#questions" class="${on('questions')}">考題庫</a></nav>
+    <span class="sp"></span>
+    <span class="save-state" id="saveState">${esc(saveState)}</span>
+    <button class="icon-btn" data-act="search" title="搜尋">${IC.search}</button>
+    <button class="icon-btn" data-act="theme" title="日間／夜間">${dark?IC.sun:IC.moon}</button>
+    <button class="icon-btn" data-act="settings" title="設定">${IC.gear}</button>
+  </div></header>
+  <main class="wrap">${conflict?`<div class="banner">另一台裝置剛剛更新過筆記，這台的修改還沒存進去。<button class="btn sm" data-act="reload">重新整理載入最新版</button></div>`:''}${backupBanner()}${inner}</main>
+  <footer style="text-align:center;color:var(--ink3);font-size:12.5px;padding:0 20px 90px">LEXNOTE. 免費的法律筆記工具・筆記只存在你自己的裝置，不會上傳</footer>
+  <nav class="mnav"><a href="#" class="${on('home')}">${IC.book}書房</a><a href="#judgments" class="${on('judgments')}">${IC.gavel}判決庫</a><a href="#questions" class="${on('questions')}">${IC.pen}考題庫</a><a href="#search" class="${on('search')}">${IC.search}搜尋</a></nav>`;
+}
+function backupBanner(){
+  const last=ls.get('lexnote-lastbackup',0), days=last?Math.floor((Date.now()-last)/864e5):null;
+  if(route.name!=='home' && (days!==null && days<7)) return '';
+  const msg = last===0 ? '你的筆記只存在這台裝置的瀏覽器裡，不會上傳到任何地方。換手機、換電腦或清除瀏覽器資料前，記得先匯出備份。' : (days>=7 ? `距離上次備份已經 ${days} 天了，記得匯出一份備份。` : `筆記只存在這台裝置的瀏覽器裡。上次備份：${fmtDate(last)}`);
+  return `<div class="banner row" style="background:var(--blue);border-color:var(--blue-b)"><span class="sp" style="min-width:200px">${msg}</span><button class="btn sm" data-act="settings">備份／搬到別台裝置</button></div>`;
+}
+function crumbs(items){ return `<div class="crumbs">${items.map((it,i)=>(i?'<i>/</i>':'')+(it[1]?`<a href="${it[1]}">${esc(it[0])}</a>`:`<span>${esc(it[0])}</span>`)).join('')}</div>`; }
+const tagsHtml = (tags=[]) => tags.length?`<div class="tags">${tags.map(t=>`<span class="tag t-${esc(t)}" data-act="tag" data-tag="${esc(t)}">${esc(t)}</span>`).join('')}</div>`:'';
+
+/* ============ views ============ */
+function viewHome(){
+  const recent=ls.get('lexnote-recent',[]).map(byId).filter(Boolean).slice(0,6);
+  const stars=db.points.filter(p=>p.star);
+  const review=db.questions.filter(q=>q.status===1).length;
+  return `<section class="hero">
+    <div class="eyebrow">Legal Knowledge Base</div>
+    <h1 class="h1">我的法律書房</h1>
+    <div class="sub">今天想從哪個主題開始？</div>
+    <form class="searchbox" data-form="search">${IC.search}<input name="q" placeholder="搜尋法條、罪名、考點、判決…" autocomplete="off"></form>
+    <div class="stat"><div><b>${db.points.length}</b>考點</div><div><b>${db.questions.length}</b>考題</div><div><b>${db.judgments.length}</b>判決</div><div><b>${review}</b>待複習題</div></div>
+  </section>
+  <div class="section"><div class="sec-head"><h2>科目</h2><span class="sp"></span></div>
+    <div class="grid">${db.subjects.map(s=>{ const cs=db.chapters.filter(c=>c.subjectId===s.id); const pc=db.points.filter(p=>cs.some(c=>c.id===p.chapterId)).length;
+      return `<div class="card" data-go="s-${s.id}"><div class="subj-mark">${esc((s.name||'')[0]||'')}</div><h3>${esc(s.name)}</h3><div class="sub" style="font-size:14px">${esc(s.sub||'')}</div><div class="meta">${cs.length} 個章節・${pc} 個考點</div></div>`; }).join('')}
+      <div class="card add" data-act="addSubject">＋ 新增科目</div></div></div>
+  ${recent.length?`<div class="section"><div class="sec-head"><h2>最近閱讀</h2></div><div class="list">${recent.map(x=>{
+      if(x.subjectId!==undefined && x.diagrams!==undefined){ const s=db.subjects.find(s=>s.id===x.subjectId); return `<div class="item" data-go="c-${x.id}"><div class="item-t">${esc(x.name)}</div><div class="item-s">${esc(s?.name||'')} · ${esc(x.part||'')}</div></div>`; }
+      if(x.chapterId!==undefined){ const c=chOfPoint(x); return `<div class="item" data-go="p-${x.id}"><div class="item-t">${esc(x.title)}${x.ref?`<span class="ref">${esc(x.ref)}</span>`:''}</div><div class="item-s">${esc(c?.name||'')}</div></div>`; }
+      return ''; }).join('')}</div></div>`:''}
+  ${stars.length?`<div class="section"><div class="sec-head"><h2>收藏考點</h2></div><div class="list">${stars.map(pointItem).join('')}</div></div>`:''}`;
+}
+function pointItem(p){ const c=chOfPoint(p); return `<div class="item" data-go="p-${p.id}"><div class="item-t">${esc(p.title||'未命名考點')}${p.ref?`<span class="ref">${esc(p.ref)}</span>`:''}</div><div class="item-s">${esc(c?c.name+'　':'')}${esc(stripHtml(p.html).slice(0,120))}</div>${tagsHtml(p.tags)}</div>`; }
+
+function viewSubject(s){
+  const cs=db.chapters.filter(c=>c.subjectId===s.id);
+  const parts=[...new Set(cs.map(c=>c.part||'未分類'))];
+  return crumbs([['書房','#'],[s.name]])+`
+  <div class="row"><div><h1 class="h1">${esc(s.name)}</h1><div class="sub">${esc(s.sub||'')}</div></div><span class="sp"></span>
+  <button class="btn ghost" data-act="editSubject" data-id="${s.id}">編輯科目</button><button class="btn pri" data-act="addChapter" data-id="${s.id}">＋ 新增章節</button></div>
+  ${cs.length?parts.map(pt=>`<div class="section"><div class="sec-head"><h2>${esc(pt)}</h2></div><div class="grid">${cs.filter(c=>(c.part||'未分類')===pt).map(c=>{ const n=db.points.filter(p=>p.chapterId===c.id).length;
+    return `<div class="card" data-go="c-${c.id}"><h3 style="font-size:19px">${esc(c.name)}</h3><div class="sub" style="font-size:13.5px">${esc(c.ref||'')}</div>${tagsHtml(c.tags)}<div class="meta">${n} 個考點</div></div>`; }).join('')}</div></div>`).join('')
+  :`<div class="empty" style="margin-top:30px">還沒有章節。按右上「新增章節」開始，例如「妨害性自主罪章」。</div>`}`;
+}
+
+function viewChapter(c){
+  const s=db.subjects.find(x=>x.id===c.subjectId);
+  const ps=db.points.filter(p=>p.chapterId===c.id);
+  const ids=[c.id,...ps.map(p=>p.id)];
+  const qs=linkedTo(db.questions,ids), js=linkedTo(db.judgments,ids);
+  pushRecent(c.id);
+  return crumbs([['書房','#'],[s?.name||'',s?'#s-'+s.id:''],[c.part||''],[c.name]])+`
+  <div class="row" style="align-items:flex-start"><div><div class="eyebrow">${esc(s?.name||'')} · ${esc(c.part||'')}</div><h1 class="h1">${esc(c.name)}</h1><div class="sub">${esc(c.ref||'')}${c.ref?'｜':''}章節總覽</div>${tagsHtml(c.tags)}</div><span class="sp"></span>
+  <button class="btn ghost" data-act="editChapter" data-id="${c.id}">編輯章節</button></div>
+  <div class="ch-layout"><aside class="toc"><div class="toc-t">章節導覽</div>
+    <a href="javascript:void 0" data-scroll="sec1"><b>01</b>體系圖</a><a href="javascript:void 0" data-scroll="sec2"><b>02</b>重要考點</a><a href="javascript:void 0" data-scroll="sec3"><b>03</b>歷屆考題</a><a href="javascript:void 0" data-scroll="sec4"><b>04</b>相關判決</a><a href="javascript:void 0" data-scroll="sec5"><b>05</b>個人補充筆記</a></aside>
+  <div>
+    <div class="section" id="sec1" style="margin-top:0"><div class="sec-head"><span class="sec-num">01</span><h2>體系圖</h2><span class="sp"></span><button class="btn sm" data-act="addDiagram" data-id="${c.id}">＋ 上傳圖片</button></div>
+      ${(c.diagrams||[]).length?`<div class="diagrams">${c.diagrams.map((d,i)=>`<div class="dia" data-act="zoom"><img data-img="${esc(d.img)}" alt=""><div class="cap"><span class="sp">${esc(d.cap||'體系圖')}</span><button class="btn ghost sm x" data-act="capDiagram" data-id="${c.id}" data-i="${i}">改名</button><button class="btn ghost sm x danger" data-act="delDiagram" data-id="${c.id}" data-i="${i}">刪除</button></div></div>`).join('')}</div>`:`<div class="empty">上傳手繪或做好的體系圖，點圖片可以放大看。</div>`}</div>
+    <div class="section" id="sec2"><div class="sec-head"><span class="sec-num">02</span><h2>重要考點</h2><span class="sp"></span><button class="btn sm pri" data-act="addPoint" data-id="${c.id}">＋ 新增考點</button></div>
+      ${ps.length?`<div class="list">${ps.map(pointItem).join('')}</div>`:`<div class="empty">還沒有考點。</div>`}</div>
+    <div class="section" id="sec3"><div class="sec-head"><span class="sec-num">03</span><h2>歷屆考題</h2><span class="sp"></span><button class="btn sm" data-act="addQuestion" data-link="${c.id}">＋ 新增考題</button></div>
+      ${qs.length?`<div class="list">${qs.map(questionCard).join('')}</div>`:`<div class="empty">還沒有連到這個章節的考題。</div>`}</div>
+    <div class="section" id="sec4"><div class="sec-head"><span class="sec-num">04</span><h2>相關判決</h2><span class="sp"></span><button class="btn sm" data-act="addJudgment" data-link="${c.id}">＋ 新增判決</button></div>
+      ${js.length?`<div class="list">${js.map(judgmentCard).join('')}</div>`:`<div class="empty">還沒有連到這個章節的判決。</div>`}</div>
+    <div class="section" id="sec5"><div class="sec-head"><span class="sec-num">05</span><h2>個人補充筆記</h2><span class="sp"></span><button class="btn sm" data-act="toggleEdit" data-id="${c.id}" data-field="supplement">${editing===c.id+':supplement'?'完成':'編輯'}</button></div>
+      <div id="docslot" data-id="${c.id}" data-field="supplement"></div></div>
+  </div></div>`;
+}
+
+function viewPoint(p){
+  const c=chOfPoint(p), s=c&&db.subjects.find(x=>x.id===c.subjectId);
+  const js=linkedTo(db.judgments,[p.id]), qs=linkedTo(db.questions,[p.id]);
+  pushRecent(p.id);
+  return crumbs([['書房','#'],[s?.name||'',s?'#s-'+s.id:''],[c?.name||'',c?'#c-'+c.id:''],[p.title||'考點']])+`
+  <div class="row" style="align-items:flex-start"><div style="flex:1;min-width:240px">
+    <div class="eyebrow">重要考點</div><h1 class="h1">${esc(p.title||'未命名考點')}${p.ref?`<span class="ref" style="font-size:14px;vertical-align:middle">${esc(p.ref)}</span>`:''}</h1>${tagsHtml(p.tags)}</div>
+    <button class="icon-btn" data-act="star" data-id="${p.id}" title="收藏" style="color:${p.star?'var(--gold)':''}">${p.star?IC.starf:IC.star}</button>
+    <button class="btn ghost" data-act="editPointMeta" data-id="${p.id}">標題／標籤</button>
+    <button class="btn ${editing===p.id+':html'?'pri':''}" data-act="toggleEdit" data-id="${p.id}" data-field="html">${editing===p.id+':html'?'完成':'編輯筆記'}</button></div>
+  <div style="margin-top:22px" id="docslot" data-id="${p.id}" data-field="html"></div>
+  <div class="section"><div class="sec-head"><span class="sec-num">Q</span><h2>相關考題</h2><span class="sp"></span><button class="btn sm" data-act="addQuestion" data-link="${p.id}">＋ 新增</button></div>
+    ${qs.length?`<div class="list">${qs.map(questionCard).join('')}</div>`:`<div class="empty">還沒有連到這個考點的考題。</div>`}</div>
+  <div class="section"><div class="sec-head"><span class="sec-num">J</span><h2>相關判決</h2><span class="sp"></span><button class="btn sm" data-act="addJudgment" data-link="${p.id}">＋ 新增</button></div>
+    ${js.length?`<div class="list">${js.map(judgmentCard).join('')}</div>`:`<div class="empty">還沒有連到這個考點的判決。</div>`}</div>
+  <div style="margin-top:40px;text-align:right"><button class="btn ghost danger sm" data-act="delPoint" data-id="${p.id}">刪除這個考點</button></div>`;
+}
+
+function linkChips(links=[]){ const xs=links.map(byId).filter(Boolean); if(!xs.length) return '';
+  return `<div class="linkchips">${xs.map(x=>x.title!==undefined?`<a class="linkchip" href="#p-${x.id}">${esc(x.title)}</a>`:`<a class="linkchip" href="#c-${x.id}">${esc(x.name)}</a>`).join('')}</div>`; }
+function judgmentCard(j){
+  return `<div class="jcard"><div class="row"><div style="flex:1;min-width:200px"><div class="jt">${esc(j.court||'')}${j.court&&j.no?'｜':''}${esc(j.no||'')}</div><div class="jm">${j.date?'裁判日期：'+esc(j.date):''}</div></div>
+    ${j.url?`<a class="btn sm" href="${esc(j.url)}" target="_blank" rel="noopener">開啟判決 ↗</a>`:''}<button class="btn ghost sm" data-act="editJudgment" data-id="${j.id}">編輯</button></div>
+    ${j.issue?`<div class="ji"><b>核心爭點</b>　${esc(j.issue)}</div>`:''}${j.summary?`<div class="js">${esc(j.summary)}</div>`:''}${tagsHtml(j.tags)}${linkChips(j.links)}</div>`;
+}
+function questionCard(q){
+  const head=[q.exam,q.year&&q.year+'年',q.num&&'第'+q.num+'題',q.type].filter(Boolean).join('・');
+  return `<div class="qcard"><div class="row"><div class="qt" style="flex:1;min-width:180px">${esc(head||'考題')}</div>
+    <div class="status">${STATUS.map((s,i)=>`<button class="s${i} ${(q.status||0)===i?'on':''}" data-act="qstatus" data-id="${q.id}" data-s="${i}">${s}</button>`).join('')}</div>
+    <button class="btn ghost sm" data-act="editQuestion" data-id="${q.id}">編輯</button></div>
+    ${q.content?`<div class="qc">${esc(q.content)}</div>`:''}
+    ${q.answer?`<details><summary>看擬答</summary><div class="qa">${esc(q.answer)}</div></details>`:''}
+    ${tagsHtml(q.tags)}${linkChips(q.links)}</div>`;
+}
+
+let jf={q:'',tag:''}, qf={q:'',status:'',exam:''};
+function viewJudgments(){
+  const tags=[...new Set(db.judgments.flatMap(j=>j.tags||[]))];
+  let xs=[...db.judgments].sort((a,b)=>(b.updated||0)-(a.updated||0));
+  if(jf.q){ const k=jf.q.toLowerCase(); xs=xs.filter(j=>[j.court,j.no,j.issue,j.summary,j.date].join(' ').toLowerCase().includes(k)); }
+  if(jf.tag) xs=xs.filter(j=>(j.tags||[]).includes(jf.tag));
+  return `<div class="row"><div><div class="eyebrow">Judgments</div><h1 class="h1">判決資料庫</h1><div class="sub">一份判決建立一次，就能連到好幾個考點。</div></div><span class="sp"></span><button class="btn pri" data-act="addJudgment">＋ 新增判決</button></div>
+  <div class="filters"><input data-filter="jq" placeholder="搜尋字號、爭點…" value="${esc(jf.q)}"><select data-filter="jtag"><option value="">全部標籤</option>${tags.map(t=>`<option ${jf.tag===t?'selected':''}>${esc(t)}</option>`).join('')}</select></div>
+  <div class="list">${xs.map(judgmentCard).join('')||'<div class="empty">還沒有判決。</div>'}</div>`;
+}
+function viewQuestions(){
+  const exams=[...new Set(db.questions.map(q=>q.exam).filter(Boolean))];
+  let xs=[...db.questions].sort((a,b)=>(String(b.year)).localeCompare(String(a.year))||(b.updated||0)-(a.updated||0));
+  if(qf.q){ const k=qf.q.toLowerCase(); xs=xs.filter(q=>[q.exam,q.year,q.content,q.answer,(q.tags||[]).join(' ')].join(' ').toLowerCase().includes(k)); }
+  if(qf.status!=='') xs=xs.filter(q=>(q.status||0)===+qf.status);
+  if(qf.exam) xs=xs.filter(q=>q.exam===qf.exam);
+  return `<div class="row"><div><div class="eyebrow">Exam Questions</div><h1 class="h1">考題資料庫</h1><div class="sub">每題可以連到考點，從考點也能反查考題。</div></div><span class="sp"></span><button class="btn pri" data-act="addQuestion">＋ 新增考題</button></div>
+  <div class="filters"><input data-filter="qq" placeholder="搜尋題目、擬答…" value="${esc(qf.q)}">
+  <select data-filter="qstatus"><option value="">全部狀態</option>${STATUS.map((s,i)=>`<option value="${i}" ${qf.status===String(i)?'selected':''}>${s}</option>`).join('')}</select>
+  <select data-filter="qexam"><option value="">全部考試</option>${exams.map(t=>`<option ${qf.exam===t?'selected':''}>${esc(t)}</option>`).join('')}</select></div>
+  <div class="list">${xs.map(questionCard).join('')||'<div class="empty">還沒有考題。</div>'}</div>`;
+}
+
+function viewSearch(){
+  const q=searchQ.trim(); let body='';
+  if(q){
+    const tagMode=q.startsWith('#'); const k=(tagMode?q.slice(1):q).toLowerCase();
+    const hit=(fields,tags)=> tagMode ? (tags||[]).some(t=>t.toLowerCase()===k) : fields.join(' ').toLowerCase().includes(k);
+    const cs=db.chapters.filter(c=>hit([c.name,c.ref,c.part,stripHtml(c.supplement)],c.tags));
+    const ps=db.points.filter(p=>hit([p.title,p.ref,stripHtml(p.html)],p.tags));
+    const js=db.judgments.filter(j=>hit([j.court,j.no,j.issue,j.summary],j.tags));
+    const qs=db.questions.filter(x=>hit([x.exam,x.year,x.content,x.answer],x.tags));
+    const total=cs.length+ps.length+js.length+qs.length;
+    const snip=(text)=>{ if(tagMode) return esc(text.slice(0,110)); const i=text.toLowerCase().indexOf(k); const st=Math.max(0,i-40); const s=text.slice(st,st+130); return (st?'…':'')+esc(s).replace(new RegExp(k.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'gi'),m=>`<span class="hl">${m}</span>`); };
+    body=`<div class="sub" style="margin:14px 0">找到 ${total} 筆</div>
+    ${cs.length?`<div class="section"><div class="sec-head"><h2>章節</h2></div><div class="list">${cs.map(c=>`<div class="item" data-go="c-${c.id}"><div class="item-t">${esc(c.name)}</div><div class="item-s">${esc(c.ref||'')}</div></div>`).join('')}</div></div>`:''}
+    ${ps.length?`<div class="section"><div class="sec-head"><h2>考點</h2></div><div class="list">${ps.map(p=>`<div class="item" data-go="p-${p.id}"><div class="item-t">${esc(p.title)}${p.ref?`<span class="ref">${esc(p.ref)}</span>`:''}</div><div class="item-s">${snip(stripHtml(p.html))}</div>${tagsHtml(p.tags)}</div>`).join('')}</div></div>`:''}
+    ${js.length?`<div class="section"><div class="sec-head"><h2>判決</h2></div><div class="list">${js.map(judgmentCard).join('')}</div></div>`:''}
+    ${qs.length?`<div class="section"><div class="sec-head"><h2>考題</h2></div><div class="list">${qs.map(questionCard).join('')}</div></div>`:''}`;
+  }
+  const alltags=[...new Set([...db.points,...db.chapters,...db.judgments,...db.questions].flatMap(x=>x.tags||[]))];
+  return `<div class="eyebrow">Search</div><h1 class="h1">搜尋</h1>
+  <form class="searchbox" data-form="search" style="margin:18px 0 0;max-width:none">${IC.search}<input name="q" value="${esc(searchQ)}" placeholder="搜尋法條、罪名、考點、判決…" autocomplete="off"></form>
+  ${alltags.length?`<div class="tags" style="margin-top:14px">${alltags.map(t=>`<span class="tag t-${esc(t)}" data-act="tag" data-tag="${esc(t)}">#${esc(t)}</span>`).join('')}</div>`:''}${body}`;
+}
+
+/* ============ render ============ */
+let editing=null; // "id:field"
+function render(){
+  const app=$('#app'); let inner='';
+  const r=route;
+  if(r.name==='subject'){ const s=db.subjects.find(x=>x.id===r.id); inner=s?viewSubject(s):notFound(); }
+  else if(r.name==='chapter'){ const c=db.chapters.find(x=>x.id===r.id); inner=c?viewChapter(c):notFound(); }
+  else if(r.name==='point'){ const p=db.points.find(x=>x.id===r.id); inner=p?viewPoint(p):notFound(); }
+  else if(r.name==='judgments') inner=viewJudgments();
+  else if(r.name==='questions') inner=viewQuestions();
+  else if(r.name==='search') inner=viewSearch();
+  else inner=viewHome();
+  app.innerHTML=shell(inner);
+  const slot=$('#docslot'); if(slot) mountDoc(slot);
+  resolveImgs(app);
+  if(r.name==='search'){ const i=$('.searchbox input'); if(i&&!searchQ) i.focus(); }
+}
+const notFound=()=>`<div class="empty">找不到這一頁，可能已經被刪除了。<a href="#">回書房</a></div>`;
+
+function mountDoc(slot){
+  const obj=byId(slot.dataset.id), field=slot.dataset.field, key=obj.id+':'+field;
+  if(editing===key){
+    const ed=makeEditor(obj[field]||'', html=>{ obj[field]=html; obj.updated=Date.now(); persist(); }, field==='supplement'?'寫下自己的補充、老師上課講的、讀書心得…':'開始寫筆記…可以插入提示框、表格、圖片');
+    slot.appendChild(ed); setTimeout(()=>$('.ed-area',ed).focus(),30);
+  } else {
+    const html=obj[field]||'';
+    slot.innerHTML = html? `<div class="paper doc">${html}</div>` : `<div class="empty">${field==='supplement'?'還沒有補充筆記，按「編輯」開始寫。':'這個考點還沒有內容，按「編輯筆記」開始寫。'}</div>`;
+  }
+}
+
+/* ============ editor ============ */
+const ALLOWED=new Set(['P','BR','B','STRONG','I','EM','U','UL','OL','LI','H2','H3','H4','TABLE','THEAD','TBODY','TR','TD','TH','A','MARK','BLOCKQUOTE','DIV','SPAN','HR','IMG','SUB','SUP']);
+function sanitize(html){
+  const d=document.createElement('div'); d.innerHTML=html;
+  (function walk(n){ for(const c of [...n.childNodes]){
+    if(c.nodeType===1){
+      if(['SCRIPT','STYLE','META','LINK','TITLE','XML','O:P'].includes(c.tagName)){ c.remove(); continue; }
+      walk(c);
+      if(!ALLOWED.has(c.tagName)){ c.replaceWith(...c.childNodes); continue; }
+      const keep={A:['href'],IMG:['data-img'],TD:['colspan','rowspan'],TH:['colspan','rowspan']}[c.tagName]||[];
+      const cls=c.getAttribute('class')||'';
+      for(const a of [...c.attributes]) if(!keep.includes(a.name)) c.removeAttribute(a.name);
+      if(/callout|c-red|plink/.test(cls)) c.setAttribute('class',cls.split(/\s+/).filter(x=>/^(callout|amber|blue|red|green|c-red|plink)$/.test(x)).join(' '));
+      if(c.tagName==='A'){ const h=c.getAttribute('href')||''; if(/^javascript:/i.test(h)) c.removeAttribute('href'); else if(!h.startsWith('#')){ c.setAttribute('target','_blank'); c.setAttribute('rel','noopener'); } }
+      if(c.tagName==='IMG' && !c.getAttribute('data-img')) c.remove();
+      if(c.tagName==='SPAN' && !c.getAttribute('class')) c.replaceWith(...c.childNodes);
+    } else if(c.nodeType===8) c.remove();
+  }})(d);
+  return d.innerHTML;
+}
+function serialize(area){ const c=area.cloneNode(true); $$('img[data-img]',c).forEach(i=>i.removeAttribute('src')); return sanitize(c.innerHTML); }
+
+function makeEditor(html,onChange,ph){
+  const w=document.createElement('div'); w.className='ed';
+  const B=(a,l,t)=>`<button type="button" data-ed="${a}" title="${t||''}">${l}</button>`;
+  w.innerHTML=`<div class="ed-bar">${B('h2','<b>大標</b>')}${B('h3','<b>小標</b>')}${B('p','內文')}<span class="sep"></span>${B('bold','<b>B</b>','粗體')}${B('italic','<i>I</i>','斜體')}${B('underline','<u>U</u>','底線')}${B('mark','<span style="background:var(--mark);padding:0 3px">螢光</span>','螢光筆')}${B('red','<span style="color:#B4483A">紅字</span>')}<span class="sep"></span>${B('ul','• 清單')}${B('ol','1. 編號')}<span class="sep"></span>${B('c-amber','🟨 重點')}${B('c-blue','🟦 提醒')}${B('c-red','🟥 易混淆')}${B('c-green','🟩 實務')}<span class="sep"></span>${B('table','表格')}${B('img','圖片')}${B('link','連結')}${B('plink','連考點')}${B('hr','分隔線')}${B('clear','清除格式')}</div>
+  <div class="ed-area doc" contenteditable="true" data-ph="${esc(ph)}"></div><input type="file" accept="image/*" hidden>`;
+  const area=$('.ed-area',w), file=$('input[type=file]',w);
+  area.innerHTML=html; resolveImgs(area);
+  let t=null; const changed=()=>{ clearTimeout(t); t=setTimeout(()=>onChange(serialize(area)),400); setSave('編輯中…'); };
+  area.addEventListener('input',changed);
+  area.addEventListener('paste',e=>{
+    const items=[...(e.clipboardData?.items||[])]; const im=items.find(i=>i.type.startsWith('image/'));
+    if(im){ e.preventDefault(); insertImageFile(im.getAsFile()); return; }
+    const h=e.clipboardData.getData('text/html');
+    if(h){ e.preventDefault(); document.execCommand('insertHTML',false,sanitize(h)); }
+  });
+  let saved=null; const keep=()=>{ const s=getSelection(); if(s.rangeCount && area.contains(s.anchorNode)) saved=s.getRangeAt(0).cloneRange(); };
+  const restore=()=>{ area.focus(); if(saved){ const s=getSelection(); s.removeAllRanges(); s.addRange(saved); } };
+  area.addEventListener('keyup',keep); area.addEventListener('mouseup',keep); area.addEventListener('blur',keep);
+  async function insertImageFile(f){ if(!f) return; try{ setSave('上傳圖片…'); const d=await fileToCompressed(f); const id=await Store.putImg(d); const src=await Store.imgSrc(id); restore(); document.execCommand('insertHTML',false,`<p><img data-img="${id}" src="${src}"></p><p><br></p>`); changed(); }catch(e){ toast('圖片上傳失敗'); setSave(''); } }
+  file.addEventListener('change',()=>{ insertImageFile(file.files[0]); file.value=''; });
+  $('.ed-bar',w).addEventListener('mousedown',e=>{ if(e.target.closest('button')) e.preventDefault(); });
+  $('.ed-bar',w).addEventListener('click',e=>{
+    const b=e.target.closest('[data-ed]'); if(!b) return; const a=b.dataset.ed; restore();
+    const ex=(c,v)=>document.execCommand(c,false,v);
+    if(['h2','h3','p'].includes(a)) ex('formatBlock',a.toUpperCase()==='P'?'P':a.toUpperCase());
+    else if(['bold','italic','underline'].includes(a)) ex(a);
+    else if(a==='mark'){ const s=getSelection().toString(); if(s) ex('insertHTML',`<mark>${esc(s)}</mark>`); }
+    else if(a==='red'){ const s=getSelection().toString(); if(s) ex('insertHTML',`<span class="c-red">${esc(s)}</span>`); }
+    else if(a==='ul') ex('insertUnorderedList'); else if(a==='ol') ex('insertOrderedList');
+    else if(a.startsWith('c-')){ const col=a.slice(2); const title={amber:'重點',blue:'考試提醒',red:'易混淆',green:'實務見解'}[col]; const s=getSelection().toString();
+      ex('insertHTML',`<div class="callout ${col}"><b>${title}</b><br>${s?esc(s):'在這裡輸入內容'}</div><p><br></p>`); }
+    else if(a==='table'){ const r=`<tr><td><br></td><td><br></td><td><br></td></tr>`; ex('insertHTML',`<table><thead><tr><th>項目</th><th>A</th><th>B</th></tr></thead><tbody>${r}${r}</tbody></table><p><br></p>`); }
+    else if(a==='img'){ file.click(); return; }
+    else if(a==='link'){ const sel=getSelection().toString(); openForm('插入判決或網址連結',[{k:'url',l:'網址',ph:'https://judgment.judicial.gov.tw/…'},{k:'text',l:'顯示文字',v:sel}],v=>{ restore(); if(v.url) ex('insertHTML',`<a href="${esc(v.url)}" target="_blank" rel="noopener">${esc(v.text||v.url)}</a>`); changed(); }); return; }
+    else if(a==='plink'){ pickOne('連到其他考點',p=>{ restore(); ex('insertHTML',`<a class="plink" href="#p-${p.id}">→ ${esc(p.title)}</a>&nbsp;`); changed(); }); return; }
+    else if(a==='hr') ex('insertHorizontalRule');
+    else if(a==='clear'){ ex('removeFormat'); ex('formatBlock','P'); }
+    changed();
+  });
+  return w;
+}
+
+/* ============ modals ============ */
+function modal(html,onMount){
+  const m=document.createElement('div'); m.className='mask'; m.innerHTML=`<div class="modal">${html}</div>`;
+  m.addEventListener('mousedown',e=>{ if(e.target===m) m.remove(); });
+  document.body.appendChild(m); onMount&&onMount(m, ()=>m.remove()); const f=$('input,textarea',m); if(f) setTimeout(()=>f.focus(),30); return m;
+}
+function askConfirm(msg,cb,okText='刪除'){ modal(`<h3>確定嗎？</h3><div class="sub">${esc(msg)}</div><div class="acts"><button class="btn" data-x>取消</button><button class="btn pri" data-ok>${okText}</button></div>`,(m,close)=>{ $('[data-x]',m).onclick=close; $('[data-ok]',m).onclick=()=>{close();cb();}; }); }
+
+/* generic form. field: {k,l,v,ph,type:'text'|'textarea'|'select'|'tags'|'links', opts} */
+function openForm(title,fields,onSave,extra){
+  const fh=f=>{
+    const v=f.v??'';
+    if(f.type==='textarea') return `<label>${f.l}</label><textarea name="${f.k}" placeholder="${esc(f.ph||'')}" rows="${f.rows||4}">${esc(v)}</textarea>`;
+    if(f.type==='select') return `<label>${f.l}</label><select name="${f.k}">${f.opts.map((o,i)=>`<option value="${i}" ${+v===i?'selected':''}>${esc(o)}</option>`).join('')}</select>`;
+    if(f.type==='tags'){ const all=[...new Set([...PRESET_TAGS,...allTags(),...(v||[])])];
+      return `<label>${f.l}</label><div class="chipsel" data-tags="${f.k}">${all.map(t=>`<span class="tag t-${esc(t)} ${(v||[]).includes(t)?'on':''}" data-t="${esc(t)}">${esc(t)}</span>`).join('')}<input placeholder="＋自訂標籤，按 Enter" style="width:160px;padding:2px 10px;font-size:13px;border-radius:999px" data-newtag></div>`; }
+    if(f.type==='links') return `<label>${f.l}</label><input placeholder="篩選章節或考點…" data-pfilter><div class="picker" data-links="${f.k}">${pickerHtml(v||[])}</div>`;
+    return `<label>${f.l}</label><input name="${f.k}" value="${esc(v)}" placeholder="${esc(f.ph||'')}" ${f.list?`list="dl-${f.k}"`:''}>${f.list?`<datalist id="dl-${f.k}">${f.list.map(o=>`<option value="${esc(o)}">`).join('')}</datalist>`:''}`;
+  };
+  modal(`<h3>${esc(title)}</h3><form>${fields.map(fh).join('')}<div class="acts">${extra?`<button type="button" class="btn ghost danger" data-del style="margin-right:auto">刪除</button>`:''}<button type="button" class="btn" data-x>取消</button><button class="btn pri">儲存</button></div></form>`,(m,close)=>{
+    $('[data-x]',m).onclick=close;
+    if(extra) $('[data-del]',m).onclick=()=>{ close(); extra(); };
+    $$('.chipsel',m).forEach(cs=>{ cs.addEventListener('click',e=>{ const t=e.target.closest('[data-t]'); if(t) t.classList.toggle('on'); });
+      const ni=$('[data-newtag]',cs); ni.addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); const t=ni.value.trim(); if(!t) return; const s=document.createElement('span'); s.className='tag on t-'+t; s.dataset.t=t; s.textContent=t; cs.insertBefore(s,ni); ni.value=''; } }); });
+    const pf=$('[data-pfilter]',m); if(pf) pf.addEventListener('input',()=>{ const k=pf.value.toLowerCase(); $$('.picker label',m).forEach(l=>{ l.style.display=l.textContent.toLowerCase().includes(k)?'':'none'; }); });
+    $('form',m).addEventListener('submit',e=>{ e.preventDefault(); const out={};
+      fields.forEach(f=>{ if(f.type==='tags') out[f.k]=$$(`[data-tags="${f.k}"] .tag.on`,m).map(x=>x.dataset.t);
+        else if(f.type==='links') out[f.k]=$$(`[data-links="${f.k}"] input:checked`,m).map(x=>x.value);
+        else if(f.type==='select') out[f.k]=+$(`[name="${f.k}"]`,m).value;
+        else out[f.k]=$(`[name="${f.k}"]`,m).value.trim(); });
+      close(); onSave(out); });
+  });
+}
+const allTags=()=>[...new Set([...db.points,...db.chapters,...db.judgments,...db.questions].flatMap(x=>x.tags||[]))];
+function pickerHtml(sel){
+  return db.subjects.map(s=>{ const cs=db.chapters.filter(c=>c.subjectId===s.id); if(!cs.length) return '';
+    return `<div class="pg">${esc(s.name)}</div>`+cs.map(c=>`<label><input type="checkbox" value="${c.id}" ${sel.includes(c.id)?'checked':''}><b>${esc(c.name)}</b></label>`+
+      db.points.filter(p=>p.chapterId===c.id).map(p=>`<label class="pl"><input type="checkbox" value="${p.id}" ${sel.includes(p.id)?'checked':''}>${esc(p.title)}${p.ref?' '+esc(p.ref):''}</label>`).join('')).join(''); }).join('') || '<div class="empty">先建立章節與考點，才能連結。</div>';
+}
+function pickOne(title,cb){
+  modal(`<h3>${esc(title)}</h3><input placeholder="篩選…" data-pfilter><div class="picker">${db.points.map(p=>`<label data-pid="${p.id}" style="cursor:pointer">${esc(p.title)} <span style="color:var(--ink3);font-size:12.5px">${esc(chOfPoint(p)?.name||'')}</span></label>`).join('')||'<div class="empty">還沒有考點。</div>'}</div><div class="acts"><button class="btn" data-x>取消</button></div>`,(m,close)=>{
+    $('[data-x]',m).onclick=close;
+    $('[data-pfilter]',m).addEventListener('input',e=>{ const k=e.target.value.toLowerCase(); $$('[data-pid]',m).forEach(l=>l.style.display=l.textContent.toLowerCase().includes(k)?'':'none'); });
+    $$('[data-pid]',m).forEach(l=>l.onclick=()=>{ close(); cb(db.points.find(p=>p.id===l.dataset.pid)); });
+  });
+}
+
+/* ============ actions ============ */
+const touch=o=>{ o.updated=Date.now(); persist(); render(); };
+const A={
+  theme(){ ls.set('lexnote-theme', ls.get('lexnote-theme','light')==='dark'?'light':'dark'); applyTheme(); render(); },
+  search(){ go('search'); },
+  reload(){ location.reload(); },
+  tag(el){ searchQ='#'+el.dataset.tag; go('search'); },
+  zoom(el,e){ if(e.target.closest('button')) return; const im=$('img',el); lightbox(im.src); },
+  addSubject(){ openForm('新增科目',[{k:'name',l:'科目名稱',ph:'例如：行政法'},{k:'sub',l:'副標',ph:'例如：總論・各論'}],v=>{ if(!v.name) return; const s={id:'s'+uid(),...v}; db.subjects.push(s); persist(); go('s-'+s.id); }); },
+  editSubject(el){ const s=byId(el.dataset.id); openForm('編輯科目',[{k:'name',l:'科目名稱',v:s.name},{k:'sub',l:'副標',v:s.sub}],v=>{ Object.assign(s,v); touch(s); },
+    ()=>askConfirm(`刪除「${s.name}」會一併刪除底下所有章節與考點。`,()=>{ const cs=db.chapters.filter(c=>c.subjectId===s.id).map(c=>c.id); db.points=db.points.filter(p=>!cs.includes(p.chapterId)); db.chapters=db.chapters.filter(c=>c.subjectId!==s.id); db.subjects=db.subjects.filter(x=>x!==s); persist(); go(''); })); },
+  addChapter(el){ const sid=el.dataset.id; const parts=[...new Set(db.chapters.filter(c=>c.subjectId===sid).map(c=>c.part).filter(Boolean)),'總則','分則'];
+    openForm('新增章節',[{k:'name',l:'章節名稱',ph:'例如：妨害性自主罪章'},{k:'part',l:'分類',ph:'例如：分則',list:[...new Set(parts)]},{k:'ref',l:'法條範圍',ph:'例如：刑法第 221 條以下'},{k:'tags',l:'標籤',type:'tags',v:[]}],v=>{ if(!v.name) return; const c={id:'c'+uid(),subjectId:sid,diagrams:[],supplement:'',...v}; db.chapters.push(c); touch(c); go('c-'+c.id); }); },
+  editChapter(el){ const c=byId(el.dataset.id); openForm('編輯章節',[{k:'name',l:'章節名稱',v:c.name},{k:'part',l:'分類',v:c.part,list:['總則','分則']},{k:'ref',l:'法條範圍',v:c.ref},{k:'tags',l:'標籤',type:'tags',v:c.tags||[]}],v=>{ Object.assign(c,v); touch(c); },
+    ()=>askConfirm(`刪除「${c.name}」會一併刪除裡面的考點（判決和考題會保留）。`,()=>{ db.points=db.points.filter(p=>p.chapterId!==c.id); db.chapters=db.chapters.filter(x=>x!==c); persist(); go('s-'+c.subjectId); })); },
+  addPoint(el){ openForm('新增考點',[{k:'title',l:'考點名稱',ph:'例如：強制性交罪｜構成要件'},{k:'ref',l:'條號',ph:'例如：§221'},{k:'tags',l:'標籤',type:'tags',v:[]}],v=>{ if(!v.title) return; const p={id:'p'+uid(),chapterId:el.dataset.id,html:'',...v,updated:Date.now()}; db.points.push(p); persist(); editing=p.id+':html'; go('p-'+p.id); }); },
+  editPointMeta(el){ const p=byId(el.dataset.id); const opts=db.chapters.map(c=>c.name);
+    openForm('考點資訊',[{k:'title',l:'考點名稱',v:p.title},{k:'ref',l:'條號',v:p.ref},{k:'ch',l:'所屬章節',type:'select',opts,v:db.chapters.findIndex(c=>c.id===p.chapterId)},{k:'tags',l:'標籤',type:'tags',v:p.tags||[]}],v=>{ p.title=v.title; p.ref=v.ref; p.tags=v.tags; p.chapterId=db.chapters[v.ch]?.id||p.chapterId; touch(p); }); },
+  delPoint(el){ const p=byId(el.dataset.id); askConfirm(`刪除考點「${p.title}」？`,()=>{ db.points=db.points.filter(x=>x!==p); persist(); go('c-'+p.chapterId); }); },
+  star(el){ const p=byId(el.dataset.id); p.star=!p.star; touch(p); },
+  toggleEdit(el){ const k=el.dataset.id+':'+el.dataset.field; editing = editing===k?null:k; if(!editing){ setSave(saveState==='編輯中…'?'儲存中…':saveState); } render(); },
+  addDiagram(el){ const c=byId(el.dataset.id); const f=document.createElement('input'); f.type='file'; f.accept='image/*'; f.multiple=true;
+    f.onchange=async()=>{ for(const file of f.files){ try{ setSave('上傳圖片…'); const d=await fileToCompressed(file); const id=await Store.putImg(d); (c.diagrams=c.diagrams||[]).push({img:id,cap:file.name.replace(/\.[^.]+$/,'')}); }catch(e){ toast('有圖片上傳失敗'); } } touch(c); }; f.click(); },
+  capDiagram(el){ const c=byId(el.dataset.id), d=c.diagrams[+el.dataset.i]; openForm('圖片名稱',[{k:'cap',l:'名稱',v:d.cap}],v=>{ d.cap=v.cap; touch(c); }); },
+  delDiagram(el){ const c=byId(el.dataset.id); askConfirm('刪除這張體系圖？',()=>{ c.diagrams.splice(+el.dataset.i,1); touch(c); }); },
+  addJudgment(el){ judgmentForm({links:el.dataset.link?[el.dataset.link]:[],tags:[]}); },
+  editJudgment(el){ judgmentForm(byId(el.dataset.id)); },
+  addQuestion(el){ questionForm({links:el.dataset.link?[el.dataset.link]:[],tags:[],status:0}); },
+  editQuestion(el){ questionForm(byId(el.dataset.id)); },
+  qstatus(el){ const q=byId(el.dataset.id); q.status=+el.dataset.s; touch(q); },
+  settings(){ settings(); },
+};
+function judgmentForm(j){
+  const isNew=!j.id;
+  openForm(isNew?'新增判決':'編輯判決',[{k:'court',l:'法院',v:j.court,ph:'例如：最高法院',list:['最高法院','憲法法庭','臺灣高等法院','最高行政法院']},{k:'no',l:'裁判字號',v:j.no,ph:'例如：○○年度台上字第○○號'},{k:'date',l:'裁判日期',v:j.date,ph:'例如：113/05/20'},{k:'url',l:'判決連結',v:j.url,ph:'貼上司法院裁判書查詢的網址'},{k:'issue',l:'核心爭點',v:j.issue},{k:'summary',l:'判決摘要與個人評註',type:'textarea',v:j.summary,rows:5},{k:'tags',l:'標籤',type:'tags',v:j.tags||[]},{k:'links',l:'關聯章節／考點（可複選）',type:'links',v:j.links||[]}],v=>{
+    if(isNew){ const n={id:'j'+uid(),...v,updated:Date.now()}; db.judgments.push(n); } else Object.assign(j,v,{updated:Date.now()}); persist(); render(); },
+    isNew?null:()=>askConfirm('刪除這筆判決？',()=>{ db.judgments=db.judgments.filter(x=>x!==j); persist(); render(); }));
+}
+function questionForm(q){
+  const isNew=!q.id; const exams=[...new Set(['律師一試','律師二試','司法官二試','司律一試','研究所考試',...db.questions.map(x=>x.exam).filter(Boolean)])];
+  openForm(isNew?'新增考題':'編輯考題',[{k:'exam',l:'考試名稱',v:q.exam,list:exams},{k:'year',l:'年度',v:q.year,ph:'例如：113'},{k:'num',l:'題號',v:q.num},{k:'type',l:'題型',v:q.type,list:['申論題','選擇題','實例題']},{k:'content',l:'題目內容',type:'textarea',v:q.content,rows:5},{k:'answer',l:'擬答',type:'textarea',v:q.answer,rows:6},{k:'status',l:'作答狀態',type:'select',opts:STATUS,v:q.status||0},{k:'tags',l:'標籤',type:'tags',v:q.tags||[]},{k:'links',l:'關聯章節／考點（可複選）',type:'links',v:q.links||[]}],v=>{
+    if(isNew){ db.questions.push({id:'q'+uid(),...v,updated:Date.now()}); } else Object.assign(q,v,{updated:Date.now()}); persist(); render(); },
+    isNew?null:()=>askConfirm('刪除這題？',()=>{ db.questions=db.questions.filter(x=>x!==q); persist(); render(); }));
+}
+function lightbox(src){ const l=document.createElement('div'); l.className='lightbox'; l.innerHTML=`<img src="${src}">`; l.onclick=()=>l.remove(); document.body.appendChild(l); }
+function settings(){
+  modal(`<h3>設定</h3>
+    <label>備份</label><div class="sub" style="font-size:14px">筆記只存在這台裝置的瀏覽器裡。<b>下載備份檔</b>會把全部筆記和圖片存成一個檔案；到另一台裝置打開這個網站，按<b>匯入備份檔</b>選這個檔案，就能把筆記搬過去。</div>
+    <div class="row" style="margin-top:10px"><button class="btn" data-exp>下載備份檔</button><button class="btn" data-imp>匯入備份檔</button><input type="file" accept=".json,application/json" hidden></div>
+    ${Store.mode==='api'?`<label>帳號</label><button class="btn" data-logout>登出這台裝置</button>`:''}
+    <div class="acts"><button class="btn" data-x>關閉</button></div>`,(m,close)=>{
+    $('[data-x]',m).onclick=close;
+    const data=async()=>{ const ids=new Set(); const scan=h=>{ (h||'').replace(/data-img="([^"]+)"/g,(_,i)=>ids.add(i)); };
+      db.points.forEach(p=>scan(p.html)); db.chapters.forEach(c=>{ scan(c.supplement); (c.diagrams||[]).forEach(d=>ids.add(d.img)); });
+      const imgs={}; for(const i of ids){ const v=await Store.imgSrc(i); if(v) imgs[i]=v; }
+      return JSON.stringify({lexnote:1,exported:Date.now(),db,imgs}); };
+    $('[data-exp]',m).onclick=async()=>{ try{ const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([await data()],{type:'application/json'})); a.download=`lexnote-備份-${fmtDate(Date.now()).replace(/\//g,'')}.json`; document.body.appendChild(a); a.click(); a.remove(); ls.set('lexnote-lastbackup',Date.now()); toast('已下載備份檔'); close(); render(); }catch(e){ toast('下載失敗'); } };
+    const fi=$('input[type=file]',m);
+    $('[data-imp]',m).onclick=()=>fi.click();
+    fi.onchange=async()=>{ try{ const raw=JSON.parse(await fi.files[0].text()); const d=normalize(raw.lexnote?raw.db:raw); const imgs=raw.imgs||{}; close(); askConfirm('匯入會用備份檔取代這台裝置上目前全部的筆記。',async()=>{ for(const [k,v] of Object.entries(imgs)){ Store.imgCache[k]=v; await idbPutWait(k,v); } db=d; persist(); go(''); render(); toast('匯入完成'); },'取代'); }catch(e){ toast('這個檔案不是正確的備份檔'); } };
+    const lo=$('[data-logout]',m); if(lo) lo.onclick=async()=>{ await fetch('/api/logout',{method:'POST',credentials:'same-origin'}); location.reload(); };
+  });
+}
+
+/* event delegation */
+document.addEventListener('click',e=>{
+  const sc=e.target.closest('[data-scroll]'); if(sc){ e.preventDefault(); document.getElementById(sc.dataset.scroll)?.scrollIntoView({behavior:'smooth',block:'start'}); return; }
+  const a=e.target.closest('[data-act]');
+  if(a && !a.closest('.modal') && A[a.dataset.act]){ e.preventDefault(); e.stopPropagation(); A[a.dataset.act](a,e); return; }
+  const g=e.target.closest('[data-go]'); if(g && !e.target.closest('a,button')){ go(g.dataset.go); return; }
+  const im=e.target.closest('.doc img'); if(im && !im.closest('[contenteditable]')) lightbox(im.src);
+});
+document.addEventListener('submit',e=>{ const f=e.target.closest('[data-form=search]'); if(f){ e.preventDefault(); searchQ=f.q.value; if(route.name==='search') render(); else go('search'); } });
+document.addEventListener('input',e=>{ const f=e.target.dataset.filter; if(!f) return;
+  const pos=e.target.selectionStart;
+  if(f==='jq') jf.q=e.target.value; else if(f==='qq') qf.q=e.target.value; else return;
+  render(); const el=$(`[data-filter="${f}"]`); if(el){ el.focus(); try{el.setSelectionRange(pos,pos);}catch(_){} } });
+document.addEventListener('change',e=>{ const f=e.target.dataset.filter; if(!f) return;
+  if(f==='jtag') jf.tag=e.target.value; else if(f==='qstatus') qf.status=e.target.value; else if(f==='qexam') qf.exam=e.target.value; else return; render(); });
+
+/* ============ login ============ */
+function viewLogin(){
+  $('#app').innerHTML=`<div class="login"><form class="box" id="loginForm"><div class="logo">LEXNOTE<span>.</span></div><div class="sub" style="margin:4px 0 26px">我的法律書房</div>
+  <input type="password" name="pw" placeholder="輸入密碼" autocomplete="current-password" style="text-align:center;border-radius:999px;padding:12px 18px">
+  <button class="btn pri" style="width:100%;justify-content:center;margin-top:12px;padding:11px">進入書房</button><div class="err" id="loginErr"></div>
+  <div class="sub" style="font-size:12.5px;margin-top:16px">每台裝置登入一次後就會記住，不用每次輸入。</div></form></div>`;
+  $('#loginForm').onsubmit=async e=>{ e.preventDefault(); const pw=e.target.pw.value; $('#loginErr').textContent='';
+    const r=await fetch('/api/login',{method:'POST',credentials:'same-origin',headers:{'content-type':'application/json'},body:JSON.stringify({pw})});
+    if(r.ok) location.reload(); else $('#loginErr').textContent= r.status===429?'嘗試太多次，請稍等幾分鐘再試':'密碼不對，再試一次'; };
+  setTimeout(()=>$('input',$('#app')).focus(),50);
+}
+
+/* ============ boot ============ */
+(async function(){
+  const r=await Store.init();
+  if(r.needLogin){ viewLogin(); return; }
+  db = r.db ? normalize(r.db) : null;
+  if(!db){ db=seed(); try{ await Store.save(db);}catch(e){} }
+  route=parseHash(); render();
+})();
+</script>
+</body>
+</html>
