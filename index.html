@@ -203,7 +203,16 @@ body.editing .mnav{display:none!important}
 .picker .pg{font-size:12.5px;color:var(--ink3);margin:8px 0 2px}
 .picker label{display:flex;gap:8px;align-items:center;margin:2px 0;font-size:14.5px;color:var(--ink);font-weight:400;cursor:pointer}
 .picker label input{width:auto}
-.picker .pl{padding-left:18px}
+.picker .pl{padding-left:46px}
+.picker .pnode>.pkids{display:none}
+.picker .pnode.open>.pkids,.picker .pnode.fopen>.pkids{display:block}
+.picker .ptw{width:22px;height:22px;flex:none;border:0;background:none;padding:0;color:var(--ink3);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;font-size:12px}
+.picker .ptw-i{display:inline-block;transition:transform .15s}
+.picker .pnode.open>.ptw .ptw-i,.picker .pnode.open>.prow .ptw-i,.picker .pnode.fopen>.ptw .ptw-i,.picker .pnode.fopen>.prow .ptw-i{transform:rotate(90deg)}
+.picker .psh{width:100%;justify-content:flex-start;gap:4px;height:auto;padding:6px 0 4px;font-size:13px;color:var(--ink2,var(--ink3));font-weight:700;letter-spacing:.04em}
+.picker .prow{display:flex;align-items:center;gap:2px;padding-left:12px}
+.picker .prow label{flex:1;margin:3px 0}
+.picker .pcnt{margin-left:auto;font-size:12px;color:var(--accent);font-weight:400;white-space:nowrap;padding-left:8px}
 .chipsel{display:flex;flex-wrap:wrap;gap:6px}
 .chipsel .tag.on{outline:2px solid var(--accent);color:var(--ink)}
 
@@ -401,11 +410,11 @@ function viewHome(){
       <div class="card add" data-act="addSubject">＋ 新增科目</div></div></div>
   ${recent.length?`<div class="section"><div class="sec-head"><h2>最近閱讀</h2></div><div class="list">${recent.map(x=>{
       if(x.subjectId!==undefined && x.diagrams!==undefined){ const s=db.subjects.find(s=>s.id===x.subjectId); return `<div class="item" data-go="c-${x.id}"><div class="item-t">${esc(x.name)}</div><div class="item-s">${esc(s?.name||'')} · ${esc(x.part||'')}</div></div>`; }
-      if(x.chapterId!==undefined){ const c=chOfPoint(x); return `<div class="item" data-go="p-${x.id}"><div class="item-t">${esc(x.title)}${x.ref?`<span class="ref">${esc(x.ref)}</span>`:''}</div><div class="item-s">${esc(c?.name||'')}</div></div>`; }
+      if(x.chapterId!==undefined){ const c=chOfPoint(x); return `<div class="item" data-go="p-${x.id}"><div class="item-t">${pHead(x)}</div><div class="item-s">${esc(c?.name||'')}</div></div>`; }
       return ''; }).join('')}</div></div>`:''}
   ${stars.length?`<div class="section"><div class="sec-head"><h2>收藏條文</h2></div><div class="list">${stars.map(pointItem).join('')}</div></div>`:''}`;
 }
-function pointItem(p){ const c=chOfPoint(p); return `<div class="item" data-go="p-${p.id}"><div class="item-t">${esc(p.title||'未命名條文')}${p.ref?`<span class="ref">${esc(p.ref)}</span>`:''}</div><div class="item-s">${esc(c?c.name+'　':'')}${esc(stripHtml(p.html).slice(0,120))}</div>${tagsHtml(p.tags)}</div>`; }
+function pointItem(p){ const c=chOfPoint(p); return `<div class="item" data-go="p-${p.id}"><div class="item-t">${pHead(p)}</div><div class="item-s">${esc(c?c.name+'　':'')}${esc(stripHtml(p.html).slice(0,120))}</div>${tagsHtml(p.tags)}</div>`; }
 
 function viewSubject(s){
   const cs=db.chapters.filter(c=>c.subjectId===s.id);
@@ -442,14 +451,16 @@ function viewChapter(c){
 }
 
 const artNum=r=>{ const m=String(r||'').match(/(\d+)(?:\s*條?\s*(?:之|-)\s*(\d+))?/); return m?(+m[1])+(m[2]?+m[2]/100:0):1e9; };
+const pName=p=>p.title||p.ref||'未命名條文';
+const pHead=(p,st='')=>p.title?`${esc(p.title)}${p.ref?`<span class="ref"${st}>${esc(p.ref)}</span>`:''}`:esc(p.ref||'未命名條文');
 const sortArticles=ps=>[...ps].sort((a,b)=>artNum(a.ref||a.title)-artNum(b.ref||b.title));
 function viewPoint(p){
   const c=chOfPoint(p), s=c&&db.subjects.find(x=>x.id===c.subjectId);
   const js=linkedTo(db.judgments,[p.id]), qs=linkedTo(db.questions,[p.id]);
   pushRecent(p.id);
-  return crumbs([['書房','#'],[s?.name||'',s?'#s-'+s.id:''],[c?.name||'',c?'#c-'+c.id:''],[p.title||'條文']])+`
+  return crumbs([['書房','#'],[s?.name||'',s?'#s-'+s.id:''],[c?.name||'',c?'#c-'+c.id:''],[pName(p)]])+`
   <div class="row" style="align-items:flex-start"><div style="flex:1;min-width:240px">
-    <div class="eyebrow">條文</div><h1 class="h1">${esc(p.title||'未命名條文')}${p.ref?`<span class="ref" style="font-size:14px;vertical-align:middle">${esc(p.ref)}</span>`:''}</h1>${tagsHtml(p.tags)}</div>
+    <div class="eyebrow">條文</div><h1 class="h1">${pHead(p,' style="font-size:14px;vertical-align:middle"')}</h1>${tagsHtml(p.tags)}</div>
     <button class="icon-btn" data-act="star" data-id="${p.id}" title="收藏" style="color:${p.star?'var(--gold)':''}">${p.star?IC.starf:IC.star}</button>
     <button class="btn ghost" data-act="editPointMeta" data-id="${p.id}">標題／標籤</button>
 </div>
@@ -465,7 +476,7 @@ function viewPoint(p){
 }
 
 function linkChips(links=[]){ const xs=links.map(byId).filter(Boolean); if(!xs.length) return '';
-  return `<div class="linkchips">${xs.map(x=>x.title!==undefined?`<a class="linkchip" href="#p-${x.id}">${esc(x.title)}</a>`:`<a class="linkchip" href="#c-${x.id}">${esc(x.name)}</a>`).join('')}</div>`; }
+  return `<div class="linkchips">${xs.map(x=>x.chapterId!==undefined?`<a class="linkchip" href="#p-${x.id}">${esc(pName(x))}</a>`:`<a class="linkchip" href="#c-${x.id}">${esc(x.name)}</a>`).join('')}</div>`; }
 function judgmentCard(j){
   return `<div class="jcard"><div class="row"><div style="flex:1;min-width:200px"><div class="jt">${esc(j.court||'')}${j.court&&j.no?'｜':''}${esc(j.no||'')}</div><div class="jm">${j.date?'裁判日期：'+esc(j.date):''}</div></div>
     ${j.url?`<a class="btn sm" href="${esc(j.url)}" target="_blank" rel="noopener">開啟判決 ↗</a>`:''}<button class="btn ghost sm" data-act="editJudgment" data-id="${j.id}">編輯</button></div>
@@ -517,7 +528,7 @@ function viewSearch(){
     const snip=(text)=>{ if(tagMode) return esc(text.slice(0,110)); const i=text.toLowerCase().indexOf(k); const st=Math.max(0,i-40); const s=text.slice(st,st+130); return (st?'…':'')+esc(s).replace(new RegExp(k.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'gi'),m=>`<span class="hl">${m}</span>`); };
     body=`<div class="sub" style="margin:14px 0">找到 ${total} 筆</div>
     ${cs.length?`<div class="section"><div class="sec-head"><h2>章節</h2></div><div class="list">${cs.map(c=>`<div class="item" data-go="c-${c.id}"><div class="item-t">${esc(c.name)}</div><div class="item-s">${esc(c.ref||'')}</div></div>`).join('')}</div></div>`:''}
-    ${ps.length?`<div class="section"><div class="sec-head"><h2>條文</h2></div><div class="list">${ps.map(p=>`<div class="item" data-go="p-${p.id}"><div class="item-t">${esc(p.title)}${p.ref?`<span class="ref">${esc(p.ref)}</span>`:''}</div><div class="item-s">${snip(stripHtml((p.html||'')+' '+(p.note||'')))}</div>${tagsHtml(p.tags)}</div>`).join('')}</div></div>`:''}
+    ${ps.length?`<div class="section"><div class="sec-head"><h2>條文</h2></div><div class="list">${ps.map(p=>`<div class="item" data-go="p-${p.id}"><div class="item-t">${pHead(p)}</div><div class="item-s">${snip(stripHtml((p.html||'')+' '+(p.note||'')))}</div>${tagsHtml(p.tags)}</div>`).join('')}</div></div>`:''}
     ${js.length?`<div class="section"><div class="sec-head"><h2>判決</h2></div><div class="list">${js.map(judgmentCard).join('')}</div></div>`:''}
     ${qs.length?`<div class="section"><div class="sec-head"><h2>考題</h2></div><div class="list">${qs.map(questionCard).join('')}</div></div>`:''}`;
   }
@@ -655,7 +666,7 @@ function makeEditor(html,onChange,ph,onDone){
     else if(a==='table'){ const r=`<tr><td><br></td><td><br></td><td><br></td></tr>`; const tb=insertBlock(`<table><thead><tr><th>項目</th><th>A</th><th>B</th></tr></thead><tbody>${r}${r}</tbody></table><p><br></p>`); caretIn(tb.querySelector('th')); }
     else if(a==='img'){ file.click(); return; }
     else if(a==='link'){ const sel=getSelection().toString(); openForm('插入判決或網址連結',[{k:'url',l:'網址',ph:'https://judgment.judicial.gov.tw/…'},{k:'text',l:'顯示文字',v:sel}],v=>{ restore(); if(v.url) ex('insertHTML',`<a href="${esc(v.url)}" target="_blank" rel="noopener">${esc(v.text||v.url)}</a>`); changed(); }); return; }
-    else if(a==='plink'){ pickOne('連到其他條文',p=>{ restore(); ex('insertHTML',`<a class="plink" href="#p-${p.id}">→ ${esc(p.title)}</a>&nbsp;`); changed(); }); return; }
+    else if(a==='plink'){ pickOne('連到其他條文',p=>{ restore(); ex('insertHTML',`<a class="plink" href="#p-${p.id}">→ ${esc(pName(p))}</a>&nbsp;`); changed(); }); return; }
     else if(a==='hr') ex('insertHorizontalRule');
     else if(a==='clear'){ ex('removeFormat'); ex('formatBlock','P'); }
     changed();
@@ -688,7 +699,7 @@ function openForm(title,fields,onSave,extra){
     if(extra) $('[data-del]',m).onclick=()=>{ close(); extra(); };
     $$('.chipsel',m).forEach(cs=>{ cs.addEventListener('click',e=>{ const t=e.target.closest('[data-t]'); if(t) t.classList.toggle('on'); });
       const ni=$('[data-newtag]',cs); ni.addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); const t=ni.value.trim(); if(!t) return; const s=document.createElement('span'); s.className='tag on t-'+t; s.dataset.t=t; s.textContent=t; cs.insertBefore(s,ni); ni.value=''; } }); });
-    const pf=$('[data-pfilter]',m); if(pf) pf.addEventListener('input',()=>{ const k=pf.value.toLowerCase(); $$('.picker label',m).forEach(l=>{ l.style.display=l.textContent.toLowerCase().includes(k)?'':'none'; }); });
+    const pf=$('[data-pfilter]',m), pk=$('.picker[data-links]',m); if(pk){ pickerWire(pk); pf.addEventListener('input',()=>pickerFilter(pk,pf.value)); }
     $('form',m).addEventListener('submit',e=>{ e.preventDefault(); const out={};
       fields.forEach(f=>{ if(f.type==='tags') out[f.k]=$$(`[data-tags="${f.k}"] .tag.on`,m).map(x=>x.dataset.t);
         else if(f.type==='links') out[f.k]=$$(`[data-links="${f.k}"] input:checked`,m).map(x=>x.value);
@@ -700,12 +711,32 @@ function openForm(title,fields,onSave,extra){
 }
 const allTags=()=>[...new Set([...db.points,...db.chapters,...db.judgments,...db.questions].flatMap(x=>x.tags||[]))];
 function pickerHtml(sel){
+  const tw=`<span class="ptw-i">▸</span>`;
   return db.subjects.map(s=>{ const cs=db.chapters.filter(c=>c.subjectId===s.id); if(!cs.length) return '';
-    return `<div class="pg">${esc(s.name)}</div>`+cs.map(c=>`<label><input type="checkbox" value="${c.id}" ${sel.includes(c.id)?'checked':''}><b>${esc(c.name)}</b></label>`+
-      db.points.filter(p=>p.chapterId===c.id).map(p=>`<label class="pl"><input type="checkbox" value="${p.id}" ${sel.includes(p.id)?'checked':''}>${esc(p.title)}${p.ref?' '+esc(p.ref):''}</label>`).join('')).join(''); }).join('') || '<div class="empty">先建立章節與條文，才能連結。</div>';
+    const sn=cs.filter(c=>sel.includes(c.id)).length+db.points.filter(p=>sel.includes(p.id)&&cs.some(c=>c.id===p.chapterId)).length;
+    return `<div class="pnode psub ${sn?'open':''}"><button type="button" class="ptw psh" data-tw>${tw}<span class="pname">${esc(s.name)}</span><span class="pcnt"></span></button><div class="pkids">`+cs.map(c=>{
+      const ps=sortArticles(db.points.filter(p=>p.chapterId===c.id)); const cn=ps.filter(p=>sel.includes(p.id)).length;
+      return `<div class="pnode pchap ${cn?'open':''}"><div class="prow">${ps.length?`<button type="button" class="ptw" data-tw>${tw}</button>`:'<span class="ptw"></span>'}<label class="pc"><input type="checkbox" value="${c.id}" ${sel.includes(c.id)?'checked':''}><b>${esc(c.name)}</b></label><span class="pcnt"></span></div><div class="pkids">`+
+        ps.map(p=>`<label class="pl"><input type="checkbox" value="${p.id}" ${sel.includes(p.id)?'checked':''}>${p.title?esc(p.title)+(p.ref?' '+esc(p.ref):''):esc(p.ref||'未命名條文')}</label>`).join('')+`</div></div>`; }).join('')+`</div></div>`; }).join('') || '<div class="empty">先建立章節與條文，才能連結。</div>';
+}
+function pickerWire(pk){
+  const cnt=()=>$$('.pnode',pk).forEach(n=>{ const k=$$('.pkids input:checked',n).length; const el=$('.pcnt',n); if(el) el.textContent=k?'已選 '+k:''; });
+  cnt(); pk.addEventListener('change',cnt);
+  pk.addEventListener('click',e=>{ const t=e.target.closest('[data-tw]'); if(!t) return; e.preventDefault(); t.closest('.pnode').classList.toggle('open'); });
+}
+function pickerFilter(pk,k){
+  k=k.trim().toLowerCase();
+  $$('.pnode',pk).forEach(n=>n.classList.remove('fopen'));
+  $$('.psub',pk).forEach(sn=>{
+    const sm=!k||$('.pname',sn).textContent.toLowerCase().includes(k); let any=false;
+    $$('.pchap',sn).forEach(cn=>{
+      const cm=sm||$('.pc',cn).textContent.toLowerCase().includes(k); let ca=false;
+      $$('.pl',cn).forEach(l=>{ const lm=cm||l.textContent.toLowerCase().includes(k); l.style.display=lm?'':'none'; if(lm&&!cm) ca=true; });
+      cn.style.display=(cm||ca)?'':'none'; if(k&&ca) cn.classList.add('fopen'); if(cm||ca) any=true; });
+    sn.style.display=(sm||any)?'':'none'; if(k&&any) sn.classList.add('fopen'); });
 }
 function pickOne(title,cb){
-  modal(`<h3>${esc(title)}</h3><input placeholder="篩選…" data-pfilter><div class="picker">${db.points.map(p=>`<label data-pid="${p.id}" style="cursor:pointer">${esc(p.title)} <span style="color:var(--ink3);font-size:12.5px">${esc(chOfPoint(p)?.name||'')}</span></label>`).join('')||'<div class="empty">還沒有條文。</div>'}</div><div class="acts"><button class="btn" data-x>取消</button></div>`,(m,close)=>{
+  modal(`<h3>${esc(title)}</h3><input placeholder="篩選…" data-pfilter><div class="picker">${db.points.map(p=>`<label data-pid="${p.id}" style="cursor:pointer">${pHead(p)} <span style="color:var(--ink3);font-size:12.5px">${esc(chOfPoint(p)?.name||'')}</span></label>`).join('')||'<div class="empty">還沒有條文。</div>'}</div><div class="acts"><button class="btn" data-x>取消</button></div>`,(m,close)=>{
     $('[data-x]',m).onclick=close;
     $('[data-pfilter]',m).addEventListener('input',e=>{ const k=e.target.value.toLowerCase(); $$('[data-pid]',m).forEach(l=>l.style.display=l.textContent.toLowerCase().includes(k)?'':'none'); });
     $$('[data-pid]',m).forEach(l=>l.onclick=()=>{ close(); cb(db.points.find(p=>p.id===l.dataset.pid)); });
@@ -727,10 +758,10 @@ const A={
     openForm('新增章節',[{k:'name',l:'章節名稱',ph:''},{k:'part',l:'分類',ph:'',list:[...new Set(parts)]},{k:'ref',l:'法條範圍',ph:''},{k:'tags',l:'標籤',type:'tags',v:[]}],v=>{ if(!v.name) return; const c={id:'c'+uid(),subjectId:sid,diagrams:[],supplement:'',...v}; db.chapters.push(c); touch(c); go('c-'+c.id); }); },
   editChapter(el){ const c=byId(el.dataset.id); openForm('編輯章節',[{k:'name',l:'章節名稱',v:c.name},{k:'part',l:'分類',v:c.part,list:['總則','分則']},{k:'ref',l:'法條範圍',v:c.ref},{k:'tags',l:'標籤',type:'tags',v:c.tags||[]}],v=>{ Object.assign(c,v); touch(c); },
     ()=>askConfirm(`刪除「${c.name}」會一併刪除裡面的條文（判決和考題會保留）。`,()=>{ db.points=db.points.filter(p=>p.chapterId!==c.id); db.chapters=db.chapters.filter(x=>x!==c); persist(); go('s-'+c.subjectId); })); },
-  addPoint(el){ openForm('新增條文',[{k:'title',l:'條文名稱',ph:''},{k:'ref',l:'條號',ph:'輸入數字就好',prefix:'§'},{k:'tags',l:'標籤',type:'tags',v:[]}],v=>{ if(!v.title) return; const p={id:'p'+uid(),chapterId:el.dataset.id,html:'',...v,updated:Date.now()}; db.points.push(p); persist(); editing=p.id+':html'; go('p-'+p.id); }); },
+  addPoint(el){ openForm('新增條文',[{k:'ref',l:'條號',ph:'輸入數字就好',prefix:'§'},{k:'title',l:'條文名稱（選填）',ph:'可以空白'},{k:'tags',l:'標籤',type:'tags',v:[]}],v=>{ if(!v.title&&!v.ref){ toast('條號或名稱至少填一個'); return; } const p={id:'p'+uid(),chapterId:el.dataset.id,html:'',...v,updated:Date.now()}; db.points.push(p); persist(); editing=p.id+':html'; go('p-'+p.id); }); },
   editPointMeta(el){ const p=byId(el.dataset.id); const opts=db.chapters.map(c=>c.name);
-    openForm('條文資訊',[{k:'title',l:'條文名稱',v:p.title},{k:'ref',l:'條號',v:p.ref,ph:'輸入數字就好',prefix:'§'},{k:'ch',l:'所屬章節',type:'select',opts,v:db.chapters.findIndex(c=>c.id===p.chapterId)},{k:'tags',l:'標籤',type:'tags',v:p.tags||[]}],v=>{ p.title=v.title; p.ref=v.ref; p.tags=v.tags; p.chapterId=db.chapters[v.ch]?.id||p.chapterId; touch(p); }); },
-  delPoint(el){ const p=byId(el.dataset.id); askConfirm(`刪除條文「${p.title}」？`,()=>{ db.points=db.points.filter(x=>x!==p); persist(); go('c-'+p.chapterId); }); },
+    openForm('條文資訊',[{k:'ref',l:'條號',v:p.ref,ph:'輸入數字就好',prefix:'§'},{k:'title',l:'條文名稱（選填）',v:p.title,ph:'可以空白'},{k:'ch',l:'所屬章節',type:'select',opts,v:db.chapters.findIndex(c=>c.id===p.chapterId)},{k:'tags',l:'標籤',type:'tags',v:p.tags||[]}],v=>{ p.title=v.title; p.ref=v.ref; p.tags=v.tags; p.chapterId=db.chapters[v.ch]?.id||p.chapterId; touch(p); }); },
+  delPoint(el){ const p=byId(el.dataset.id); askConfirm(`刪除條文「${pName(p)}」？`,()=>{ db.points=db.points.filter(x=>x!==p); persist(); go('c-'+p.chapterId); }); },
   star(el){ const p=byId(el.dataset.id); p.star=!p.star; touch(p); },
   toggleEdit(el){ const k=el.dataset.id+':'+el.dataset.field; editing = editing===k?null:k; if(!editing){ setSave(saveState==='編輯中…'?'儲存中…':saveState); } render(); },
   addDiagram(el){ const c=byId(el.dataset.id); const f=document.createElement('input'); f.type='file'; f.accept='image/*'; f.multiple=true;
