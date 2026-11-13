@@ -12,6 +12,7 @@
   --line:#E2D8C7; --accent:#8A3A2C; --accent-soft:#F3E3D9; --gold:#A8843A;
   --amber:#FBF0D3; --amber-b:#D9B65C; --blue:#E3ECF3; --blue-b:#7C9DB8; --red:#F7E1DE; --red-b:#C47A6E; --green:#E3EFE2; --green-b:#7FA67A;
   --mark:#F8E59B; --shadow:0 1px 2px rgba(60,40,20,.05),0 4px 16px rgba(60,40,20,.05);
+  --mk-a:rgba(248,214,110,.6); --mk-pink:rgba(232,170,160,.34); --mk-blue:rgba(140,170,200,.3); --mk-ul:rgba(160,70,55,.75);
   --serif:'Noto Serif TC',serif; --sans:'Noto Sans TC',system-ui,sans-serif; --latin:'Cormorant Garamond',serif;
 }
 [data-theme=dark]{
@@ -19,6 +20,7 @@
   --line:#37322C; --accent:#D99478; --accent-soft:#3A2A23; --gold:#CBA75E;
   --amber:#3A3220; --amber-b:#9C8240; --blue:#1F2B35; --blue-b:#5D7F9B; --red:#3A2421; --red-b:#A0625A; --green:#22301F; --green-b:#5F8A5A;
   --mark:#6B5A1E; --shadow:0 1px 2px rgba(0,0,0,.3),0 4px 16px rgba(0,0,0,.25);
+  --mk-a:rgba(200,160,60,.45); --mk-pink:rgba(200,120,110,.32); --mk-blue:rgba(110,150,190,.32); --mk-ul:rgba(230,140,120,.85);
 }
 *{box-sizing:border-box}
 html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.75;-webkit-font-smoothing:antialiased}
@@ -150,7 +152,10 @@ h1,h2,h3,h4{font-family:var(--serif);line-height:1.4;margin:0}
 .doc h2{font-size:22px;margin:1.3em 0 .5em}
 .doc h3{font-size:18.5px;margin:1.2em 0 .4em}
 .doc p{margin:.5em 0}
-.doc mark{background:var(--mark);color:inherit;padding:0 2px;border-radius:2px}
+.doc mark{background:linear-gradient(transparent 58%,var(--mk-a) 58%);color:inherit;padding:0 1px}
+.doc .hl-pink{background:var(--mk-pink);border-radius:4px;padding:1px 3px}
+.doc .hl-blue{background:var(--mk-blue);border-radius:4px;padding:1px 3px}
+.doc .ul-red{text-decoration:underline;text-decoration-color:var(--mk-ul);text-decoration-thickness:2px;text-underline-offset:5px}
 .doc img{max-width:100%;border-radius:8px;border:1px solid var(--line);cursor:zoom-in;background:#fff}
 .doc table{border-collapse:collapse;width:100%;margin:12px 0;font-size:15px}
 .doc td,.doc th{border:1px solid var(--line);padding:7px 10px;vertical-align:top}
@@ -564,7 +569,7 @@ function sanitize(html){
       const keep={A:['href'],IMG:['data-img'],TD:['colspan','rowspan'],TH:['colspan','rowspan']}[c.tagName]||[];
       const cls=c.getAttribute('class')||'';
       for(const a of [...c.attributes]) if(!keep.includes(a.name)) c.removeAttribute(a.name);
-      if(/callout|c-red|plink/.test(cls)) c.setAttribute('class',cls.split(/\s+/).filter(x=>/^(callout|amber|blue|red|green|c-red|plink)$/.test(x)).join(' '));
+      if(/callout|c-red|plink|hl-pink|hl-blue|ul-red/.test(cls)) c.setAttribute('class',cls.split(/\s+/).filter(x=>/^(callout|amber|blue|red|green|c-red|plink|hl-pink|hl-blue|ul-red)$/.test(x)).join(' '));
       if(c.tagName==='A'){ const h=c.getAttribute('href')||''; if(/^javascript:/i.test(h)) c.removeAttribute('href'); else if(!h.startsWith('#')){ c.setAttribute('target','_blank'); c.setAttribute('rel','noopener'); } }
       if(c.tagName==='IMG' && !c.getAttribute('data-img')) c.remove();
       if(c.tagName==='SPAN' && !c.getAttribute('class')) c.replaceWith(...c.childNodes);
@@ -577,9 +582,19 @@ function serialize(area){ const c=area.cloneNode(true); $$('img[data-img]',c).fo
 function makeEditor(html,onChange,ph,onDone){
   const w=document.createElement('div'); w.className='ed';
   const B=(a,l,t)=>`<button type="button" data-ed="${a}" title="${t||''}">${l}</button>`;
-  w.innerHTML=`<div class="ed-bar"><button type="button" data-ed="done" class="done">✓ 完成</button>${B('h2','<b>大標</b>')}${B('h3','<b>小標</b>')}${B('p','內文')}<span class="sep"></span>${B('bold','<b>B</b>','粗體')}${B('italic','<i>I</i>','斜體')}${B('underline','<u>U</u>','底線')}${B('mark','<span style="background:var(--mark);padding:0 3px">螢光</span>','螢光筆')}${B('red','<span style="color:#B4483A">紅字</span>')}<span class="sep"></span>${B('ul','• 清單')}${B('ol','1. 編號')}<span class="sep"></span>${B('c-amber','🟨 重點')}${B('c-blue','🟦 提醒')}${B('c-red','🟥 易混淆')}${B('c-green','🟩 實務')}<span class="sep"></span>${B('table','表格')}${B('img','圖片')}${B('link','連結')}${B('plink','連條文')}${B('hr','分隔線')}${B('clear','清除格式')}${B('delblock','🗑 刪除方塊','刪除游標所在的提示框、表格或點選的圖片')}</div>
+  w.innerHTML=`<div class="ed-bar"><button type="button" data-ed="done" class="done">✓ 完成</button>${B('h2','<b>大標</b>')}${B('h3','<b>小標</b>')}${B('p','內文')}<span class="sep"></span>${B('bold','<b>B</b>','粗體')}${B('italic','<i>I</i>','斜體')}${B('underline','<u>U</u>','底線')}${B('hlmenu','<span style="background:linear-gradient(transparent 55%,var(--mk-a) 55%);padding:0 2px">畫重點</span> ▾','選一種畫重點的樣式')}${B('red','<span style="color:#B4483A">紅字</span>')}<span class="sep"></span>${B('ul','• 清單')}${B('ol','1. 編號')}<span class="sep"></span>${B('c-amber','🟨 重點')}${B('c-blue','🟦 提醒')}${B('c-red','🟥 易混淆')}${B('c-green','🟩 實務')}<span class="sep"></span>${B('table','表格')}${B('img','圖片')}${B('link','連結')}${B('plink','連條文')}${B('hr','分隔線')}${B('clear','清除格式')}${B('delblock','🗑 刪除方塊','刪除游標所在的提示框、表格或點選的圖片')}</div>
   <div class="ed-area doc" contenteditable="true" data-ph="${esc(ph)}"></div><input type="file" accept="image/*" hidden>`;
-  const area=$('.ed-area',w), file=$('input[type=file]',w);
+  const area=$('.ed-area',w), file=$('input[type=file]',w), bar=$('.ed-bar',w); const mainBar=bar.innerHTML;
+  const hlBar=`<button type="button" data-ed="hl-back">‹ 返回</button>${B('mark','<span style="background:linear-gradient(transparent 55%,var(--mk-a) 55%);padding:0 2px">螢光</span>','半截螢光')}${B('hl-pink','<span style="background:var(--mk-pink);border-radius:3px;padding:0 4px">粉底</span>','粉色底')}${B('hl-blue','<span style="background:var(--mk-blue);border-radius:3px;padding:0 4px">藍底</span>','藍色底')}${B('ul-red','<span style="text-decoration:underline;text-decoration-color:var(--mk-ul);text-decoration-thickness:2px;text-underline-offset:4px">底線</span>','紅色底線')}${B('hl-none','取消標記','把選取文字的標記拿掉')}`;
+  const wrapSel=(tag,cls)=>{ const s=getSelection(); if(!s.rangeCount||s.isCollapsed) return false; const r=s.getRangeAt(0); if(!area.contains(r.commonAncestorContainer)) return false;
+    const el=document.createElement(tag); if(cls) el.className=cls; el.appendChild(r.extractContents()); r.insertNode(el);
+    el.querySelectorAll('mark,span.hl-pink,span.hl-blue,span.ul-red').forEach(x=>x.replaceWith(...x.childNodes));
+    const nr=document.createRange(); nr.selectNodeContents(el); s.removeAllRanges(); s.addRange(nr); saved=nr.cloneRange(); return true; };
+  const unmarkSel=()=>{ const s=getSelection(); if(!s.rangeCount) return; const r=s.getRangeAt(0); const isM=x=>x.nodeType===1&&(x.tagName==='MARK'||/\b(hl-pink|hl-blue|ul-red)\b/.test(x.className||''));
+    const hits=new Set(); let n=r.commonAncestorContainer; while(n&&n!==area){ if(isM(n)) hits.add(n); n=n.parentNode; }
+    const root=r.commonAncestorContainer.nodeType===1?r.commonAncestorContainer:r.commonAncestorContainer.parentNode;
+    root.querySelectorAll&&root.querySelectorAll('mark,span.hl-pink,span.hl-blue,span.ul-red').forEach(x=>{ if(r.intersectsNode(x)) hits.add(x); });
+    hits.forEach(x=>x.replaceWith(...x.childNodes)); area.normalize(); };
   area.innerHTML=html; resolveImgs(area);
   let t=null; const changed=()=>{ clearTimeout(t); t=setTimeout(()=>onChange(serialize(area)),400); setSave('編輯中…'); };
   area.addEventListener('input',changed);
@@ -618,6 +633,11 @@ function makeEditor(html,onChange,ph,onDone){
   $('.ed-bar',w).addEventListener('click',e=>{
     const b=e.target.closest('[data-ed]'); if(!b) return; const a=b.dataset.ed;
     if(a==='done'){ if(onDone) onDone(); return; }
+    if(a==='hlmenu'){ bar.innerHTML=hlBar; bar.scrollLeft=0; return; }
+    if(a==='hl-back'){ bar.innerHTML=mainBar; return; }
+    if(['mark','hl-pink','hl-blue','ul-red','hl-none'].includes(a)){ restore();
+      if(a==='hl-none') unmarkSel(); else if(!wrapSel(a==='mark'?'mark':'span', a==='mark'?'':a)){ toast('先選取要畫重點的文字'); return; }
+      bar.innerHTML=mainBar; changed(); return; }
     if(a==='delblock'){ if(picked && area.contains(picked)){ const par=picked.parentElement; picked.remove(); if(par&&par!==area&&!par.textContent.trim()&&!par.querySelector('img')) removeBlock(par); else changed(); picked=null; return; }
       restore(); const blk=blockAtCaret(); if(blk) removeBlock(blk); else toast('先把游標點進要刪的提示框或表格，或點一下圖片'); return; }
     restore();
@@ -625,6 +645,7 @@ function makeEditor(html,onChange,ph,onDone){
     if(['h2','h3','p'].includes(a)) ex('formatBlock',a.toUpperCase()==='P'?'P':a.toUpperCase());
     else if(['bold','italic','underline'].includes(a)) ex(a);
     else if(a==='mark'){ const s=getSelection().toString(); if(s) ex('insertHTML',`<mark>${esc(s)}</mark>`); }
+    else if(['hl-pink','hl-blue','ul-red'].includes(a)){ const s=getSelection().toString(); if(s) ex('insertHTML',`<span class="${a}">${esc(s)}</span>`); else toast('先選取要標記的文字'); }
     else if(a==='red'){ const s=getSelection().toString(); if(s) ex('insertHTML',`<span class="c-red">${esc(s)}</span>`); }
     else if(a==='ul') ex('insertUnorderedList'); else if(a==='ol') ex('insertOrderedList');
     else if(a.startsWith('c-')){ const col=a.slice(2); const title={amber:'重點',blue:'考試提醒',red:'易混淆',green:'實務見解'}[col]; const s=getSelection().toString();
