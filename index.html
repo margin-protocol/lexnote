@@ -415,7 +415,7 @@ function viewSubject(s){
   <button class="btn ghost" data-act="editSubject" data-id="${s.id}">編輯科目</button><button class="btn pri" data-act="addChapter" data-id="${s.id}">＋ 新增章節</button></div>
   ${cs.length?parts.map(pt=>`<div class="section"><div class="sec-head"><h2>${esc(pt)}</h2></div><div class="grid">${cs.filter(c=>(c.part||'未分類')===pt).map(c=>{ const n=db.points.filter(p=>p.chapterId===c.id).length;
     return `<div class="card" data-go="c-${c.id}"><h3 style="font-size:19px">${esc(c.name)}</h3><div class="sub" style="font-size:13.5px">${esc(c.ref||'')}</div>${tagsHtml(c.tags)}<div class="meta">${n} 個條文</div></div>`; }).join('')}</div></div>`).join('')
-  :`<div class="empty" style="margin-top:30px">還沒有章節。按右上「新增章節」開始，例如「妨害性自主罪章」。</div>`}`;
+  :`<div class="empty" style="margin-top:30px">還沒有章節。按右上「新增章節」開始。</div>`}`;
 }
 
 function viewChapter(c){
@@ -441,7 +441,7 @@ function viewChapter(c){
   </div></div>`;
 }
 
-const artNum=r=>{ const m=String(r||'').match(/(\d+)(?:\s*條?\s*之\s*(\d+))?/); return m?(+m[1])+(m[2]?+m[2]/100:0):1e9; };
+const artNum=r=>{ const m=String(r||'').match(/(\d+)(?:\s*條?\s*(?:之|-)\s*(\d+))?/); return m?(+m[1])+(m[2]?+m[2]/100:0):1e9; };
 const sortArticles=ps=>[...ps].sort((a,b)=>artNum(a.ref||a.title)-artNum(b.ref||b.title));
 function viewPoint(p){
   const c=chOfPoint(p), s=c&&db.subjects.find(x=>x.id===c.subjectId);
@@ -680,6 +680,7 @@ function openForm(title,fields,onSave,extra){
     if(f.type==='tags'){ const all=[...new Set([...PRESET_TAGS,...allTags(),...(v||[])])];
       return `<label>${f.l}</label><div class="chipsel" data-tags="${f.k}">${all.map(t=>`<span class="tag t-${esc(t)} ${(v||[]).includes(t)?'on':''}" data-t="${esc(t)}">${esc(t)}</span>`).join('')}<input placeholder="＋自訂標籤，按 Enter" style="width:160px;padding:2px 10px;font-size:13px;border-radius:999px" data-newtag></div>`; }
     if(f.type==='links') return `<label>${f.l}</label><input placeholder="篩選章節或條文…" data-pfilter><div class="picker" data-links="${f.k}">${pickerHtml(v||[])}</div>`;
+    if(f.prefix) return `<label>${f.l}</label><div style="display:flex;align-items:center;gap:8px"><span style="font-family:var(--serif);font-size:18px;color:var(--accent)">${esc(f.prefix)}</span><input name="${f.k}" value="${esc(String(v).replace(/^\s*[§]\s*/,''))}" placeholder="${esc(f.ph||'')}" autocomplete="off"></div>`;
     return `<label>${f.l}</label><input name="${f.k}" value="${esc(v)}" placeholder="${esc(f.ph||'')}" ${f.list?`list="dl-${f.k}"`:''}>${f.list?`<datalist id="dl-${f.k}">${f.list.map(o=>`<option value="${esc(o)}">`).join('')}</datalist>`:''}`;
   };
   modal(`<h3>${esc(title)}</h3><form>${fields.map(fh).join('')}<div class="acts">${extra?`<button type="button" class="btn ghost danger" data-del style="margin-right:auto">刪除</button>`:''}<button type="button" class="btn" data-x>取消</button><button class="btn pri">儲存</button></div></form>`,(m,close)=>{
@@ -692,6 +693,7 @@ function openForm(title,fields,onSave,extra){
       fields.forEach(f=>{ if(f.type==='tags') out[f.k]=$$(`[data-tags="${f.k}"] .tag.on`,m).map(x=>x.dataset.t);
         else if(f.type==='links') out[f.k]=$$(`[data-links="${f.k}"] input:checked`,m).map(x=>x.value);
         else if(f.type==='select') out[f.k]=+$(`[name="${f.k}"]`,m).value;
+        else if(f.prefix){ let x=$(`[name="${f.k}"]`,m).value.replace(/[０-９]/g,c=>String.fromCharCode(c.charCodeAt(0)-65248)).replace(/^\s*[§]\s*/,'').trim(); out[f.k]=x?f.prefix+x:''; }
         else out[f.k]=$(`[name="${f.k}"]`,m).value.trim(); });
       close(); onSave(out); });
   });
@@ -718,16 +720,16 @@ const A={
   reload(){ location.reload(); },
   tag(el){ searchQ='#'+el.dataset.tag; go('search'); },
   zoom(el,e){ if(e.target.closest('button')) return; const im=$('img',el); lightbox(im.src); },
-  addSubject(){ openForm('新增科目',[{k:'name',l:'科目名稱',ph:'例如：行政法'},{k:'sub',l:'副標',ph:'例如：總論・各論'}],v=>{ if(!v.name) return; const s={id:'s'+uid(),...v}; db.subjects.push(s); persist(); go('s-'+s.id); }); },
+  addSubject(){ openForm('新增科目',[{k:'name',l:'科目名稱',ph:''},{k:'sub',l:'副標',ph:''}],v=>{ if(!v.name) return; const s={id:'s'+uid(),...v}; db.subjects.push(s); persist(); go('s-'+s.id); }); },
   editSubject(el){ const s=byId(el.dataset.id); openForm('編輯科目',[{k:'name',l:'科目名稱',v:s.name},{k:'sub',l:'副標',v:s.sub}],v=>{ Object.assign(s,v); touch(s); },
     ()=>askConfirm(`刪除「${s.name}」會一併刪除底下所有章節與條文。`,()=>{ const cs=db.chapters.filter(c=>c.subjectId===s.id).map(c=>c.id); db.points=db.points.filter(p=>!cs.includes(p.chapterId)); db.chapters=db.chapters.filter(c=>c.subjectId!==s.id); db.subjects=db.subjects.filter(x=>x!==s); persist(); go(''); })); },
   addChapter(el){ const sid=el.dataset.id; const parts=[...new Set(db.chapters.filter(c=>c.subjectId===sid).map(c=>c.part).filter(Boolean)),'總則','分則'];
-    openForm('新增章節',[{k:'name',l:'章節名稱',ph:'例如：妨害性自主罪章'},{k:'part',l:'分類',ph:'例如：分則',list:[...new Set(parts)]},{k:'ref',l:'法條範圍',ph:'例如：刑法第 221 條以下'},{k:'tags',l:'標籤',type:'tags',v:[]}],v=>{ if(!v.name) return; const c={id:'c'+uid(),subjectId:sid,diagrams:[],supplement:'',...v}; db.chapters.push(c); touch(c); go('c-'+c.id); }); },
+    openForm('新增章節',[{k:'name',l:'章節名稱',ph:''},{k:'part',l:'分類',ph:'',list:[...new Set(parts)]},{k:'ref',l:'法條範圍',ph:''},{k:'tags',l:'標籤',type:'tags',v:[]}],v=>{ if(!v.name) return; const c={id:'c'+uid(),subjectId:sid,diagrams:[],supplement:'',...v}; db.chapters.push(c); touch(c); go('c-'+c.id); }); },
   editChapter(el){ const c=byId(el.dataset.id); openForm('編輯章節',[{k:'name',l:'章節名稱',v:c.name},{k:'part',l:'分類',v:c.part,list:['總則','分則']},{k:'ref',l:'法條範圍',v:c.ref},{k:'tags',l:'標籤',type:'tags',v:c.tags||[]}],v=>{ Object.assign(c,v); touch(c); },
     ()=>askConfirm(`刪除「${c.name}」會一併刪除裡面的條文（判決和考題會保留）。`,()=>{ db.points=db.points.filter(p=>p.chapterId!==c.id); db.chapters=db.chapters.filter(x=>x!==c); persist(); go('s-'+c.subjectId); })); },
-  addPoint(el){ openForm('新增條文',[{k:'title',l:'條文名稱',ph:'例如：強制性交罪'},{k:'ref',l:'條號',ph:'例如：§221'},{k:'tags',l:'標籤',type:'tags',v:[]}],v=>{ if(!v.title) return; const p={id:'p'+uid(),chapterId:el.dataset.id,html:'',...v,updated:Date.now()}; db.points.push(p); persist(); editing=p.id+':html'; go('p-'+p.id); }); },
+  addPoint(el){ openForm('新增條文',[{k:'title',l:'條文名稱',ph:''},{k:'ref',l:'條號',ph:'輸入數字就好',prefix:'§'},{k:'tags',l:'標籤',type:'tags',v:[]}],v=>{ if(!v.title) return; const p={id:'p'+uid(),chapterId:el.dataset.id,html:'',...v,updated:Date.now()}; db.points.push(p); persist(); editing=p.id+':html'; go('p-'+p.id); }); },
   editPointMeta(el){ const p=byId(el.dataset.id); const opts=db.chapters.map(c=>c.name);
-    openForm('條文資訊',[{k:'title',l:'條文名稱',v:p.title},{k:'ref',l:'條號',v:p.ref},{k:'ch',l:'所屬章節',type:'select',opts,v:db.chapters.findIndex(c=>c.id===p.chapterId)},{k:'tags',l:'標籤',type:'tags',v:p.tags||[]}],v=>{ p.title=v.title; p.ref=v.ref; p.tags=v.tags; p.chapterId=db.chapters[v.ch]?.id||p.chapterId; touch(p); }); },
+    openForm('條文資訊',[{k:'title',l:'條文名稱',v:p.title},{k:'ref',l:'條號',v:p.ref,ph:'輸入數字就好',prefix:'§'},{k:'ch',l:'所屬章節',type:'select',opts,v:db.chapters.findIndex(c=>c.id===p.chapterId)},{k:'tags',l:'標籤',type:'tags',v:p.tags||[]}],v=>{ p.title=v.title; p.ref=v.ref; p.tags=v.tags; p.chapterId=db.chapters[v.ch]?.id||p.chapterId; touch(p); }); },
   delPoint(el){ const p=byId(el.dataset.id); askConfirm(`刪除條文「${p.title}」？`,()=>{ db.points=db.points.filter(x=>x!==p); persist(); go('c-'+p.chapterId); }); },
   star(el){ const p=byId(el.dataset.id); p.star=!p.star; touch(p); },
   toggleEdit(el){ const k=el.dataset.id+':'+el.dataset.field; editing = editing===k?null:k; if(!editing){ setSave(saveState==='編輯中…'?'儲存中…':saveState); } render(); },
@@ -744,13 +746,13 @@ const A={
 };
 function judgmentForm(j){
   const isNew=!j.id;
-  openForm(isNew?'新增判決':'編輯判決',[{k:'court',l:'法院',v:j.court,ph:'例如：最高法院',list:['最高法院','憲法法庭','臺灣高等法院','最高行政法院']},{k:'no',l:'裁判字號',v:j.no,ph:'例如：○○年度台上字第○○號'},{k:'date',l:'裁判日期',v:j.date,ph:'例如：113/05/20'},{k:'url',l:'判決連結',v:j.url,ph:'貼上司法院裁判書查詢的網址'},{k:'issue',l:'核心爭點',v:j.issue},{k:'summary',l:'判決摘要與個人評註',type:'textarea',v:j.summary,rows:5},{k:'tags',l:'標籤',type:'tags',v:j.tags||[]},{k:'links',l:'關聯章節／條文（可複選）',type:'links',v:j.links||[]}],v=>{
+  openForm(isNew?'新增判決':'編輯判決',[{k:'court',l:'法院',v:j.court,ph:'',list:['最高法院','憲法法庭','臺灣高等法院','最高行政法院']},{k:'no',l:'裁判字號',v:j.no,ph:'○○年度台上字第○○號'},{k:'date',l:'裁判日期',v:j.date,ph:''},{k:'url',l:'判決連結',v:j.url,ph:'貼上司法院裁判書查詢的網址'},{k:'issue',l:'核心爭點',v:j.issue},{k:'summary',l:'判決摘要與個人評註',type:'textarea',v:j.summary,rows:5},{k:'tags',l:'標籤',type:'tags',v:j.tags||[]},{k:'links',l:'關聯章節／條文（可複選）',type:'links',v:j.links||[]}],v=>{
     if(isNew){ const n={id:'j'+uid(),...v,updated:Date.now()}; db.judgments.push(n); } else Object.assign(j,v,{updated:Date.now()}); persist(); render(); },
     isNew?null:()=>askConfirm('刪除這筆判決？',()=>{ db.judgments=db.judgments.filter(x=>x!==j); persist(); render(); }));
 }
 function questionForm(q){
   const isNew=!q.id; const exams=[...new Set(['律師一試','律師二試','司法官二試','司律一試','研究所考試',...db.questions.map(x=>x.exam).filter(Boolean)])];
-  openForm(isNew?'新增考題':'編輯考題',[{k:'exam',l:'考試名稱',v:q.exam,list:exams},{k:'year',l:'年度',v:q.year,ph:'例如：113'},{k:'num',l:'題號',v:q.num},{k:'type',l:'題型',v:q.type,list:['申論題','選擇題','實例題']},{k:'content',l:'題目內容',type:'textarea',v:q.content,rows:5},{k:'answer',l:'擬答',type:'textarea',v:q.answer,rows:6},{k:'status',l:'作答狀態',type:'select',opts:STATUS,v:q.status||0},{k:'tags',l:'標籤',type:'tags',v:q.tags||[]},{k:'links',l:'關聯章節／條文（可複選）',type:'links',v:q.links||[]}],v=>{
+  openForm(isNew?'新增考題':'編輯考題',[{k:'exam',l:'考試名稱',v:q.exam,list:exams},{k:'year',l:'年度',v:q.year,ph:''},{k:'num',l:'題號',v:q.num},{k:'type',l:'題型',v:q.type,list:['申論題','選擇題','實例題']},{k:'content',l:'題目內容',type:'textarea',v:q.content,rows:5},{k:'answer',l:'擬答',type:'textarea',v:q.answer,rows:6},{k:'status',l:'作答狀態',type:'select',opts:STATUS,v:q.status||0},{k:'tags',l:'標籤',type:'tags',v:q.tags||[]},{k:'links',l:'關聯章節／條文（可複選）',type:'links',v:q.links||[]}],v=>{
     if(isNew){ db.questions.push({id:'q'+uid(),...v,updated:Date.now()}); } else Object.assign(q,v,{updated:Date.now()}); persist(); render(); },
     isNew?null:()=>askConfirm('刪除這題？',()=>{ db.questions=db.questions.filter(x=>x!==q); persist(); render(); }));
 }
